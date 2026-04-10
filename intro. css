@@ -1,0 +1,22 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+#intro-screen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #1fa2ff, #12d8fa, #1dd1a1);
+    color: white;
+}
+
+#intro-screen h1 {
+    font-size: 40px;
+}
+
+#intro-screen p {
+    font-size: 18px;
+}
