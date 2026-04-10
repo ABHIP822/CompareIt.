@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompareIt - Home</title>
+    <link rel="stylesheet" href="home.css">
+</head>
+<body>
+    <header>
+        <div class="logo">CompareIt</div>
+        <div class="icons">
+            <button id="settings-btn">⚙️</button>
+        </div>
+    </header>
+
+    <input type="text" id="search-input" placeholder="Search products...">
+
+    <div id="loading" class="hidden">Loading...</div>
+    <div id="limit-message" class="hidden limit-message" style="color:red; text-align: center; margin-top: 20px;">
+        API rate limit reached. Please try again later.
+    </div>
+
+    <h2 class="section-title">All Food</h2>
+    <div id="product-list">
+        <p>Search products to display results</p>
+    </div>
+    <div id="scroll-anchor" style="height: 20px;"></div>
+
+    <button id="compare-btn" type="button">Compare Selected Products</button>
+
+    <div id="product-details" class="hidden">
+        <h2>Product Details</h2>
+        <img id="detail-img" src="" alt="product Image">
+        <h3 id="detail-name"></h3>
+        <p id="detail-brand"></p>
+        <p id="detail-price"></p>
+        <p id="detail-ingredients"></p>
+        <div id="safety-status"></div>
+        <div class="api-credit">
+            <p>Data provided by <strong>Open Food Facts</strong>. This website uses the Open Food Facts API.</p>
+            <p>Visit: <a href="https://world.openfoodfacts.org" target="_blank">https://world.openfoodfacts.org</a></p>
+            <p>This product information is sourced from Open Food Facts and is displayed as per their open data terms.</p>
+        </div>
+    </div>
+
+    <div id="compare-section" class="hidden">
+        <h2>Comparison</h2>
+        <div class="compare-container">
+            <div id="compare1"></div>
+            <div id="compare2"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>CompareIt | powered by Open Food Facts API</p>
+    </footer>
+
+    <script src="home.js"></script>
+</body>
+</html>
