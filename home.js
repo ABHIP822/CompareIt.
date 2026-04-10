@@ -75,15 +75,18 @@ searchInput.addEventListener('input', () => {
 });
 
 // Show product details when a product is clicked
-productList.addEventListener('click',(e) => { const card =
-   e.target.closest('.product-card'); 
-        
-        if (card) {
+productList.addEventListener('click', (e) => {
+    const card = e.target.closest('.product-card');
+
+    if (card) {
         const index = Array.from(productList.children).indexOf(card);
-        const product =
-        currentProducts[index];//Fix
-        if (product)
-        showProductDetails(product);
+        const product = currentProducts[index];
+
+        if (product) {
+            showProductDetails(product);
+        }
+    }
+});
         }
     }
 });
