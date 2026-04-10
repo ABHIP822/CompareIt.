@@ -2,7 +2,7 @@ let page = 1;
 const productList = document.getElementById('product-list');
 const searchInput = document.getElementById('search-input');
 const loadingIndicator = document.getElementById('loading');
-const limit = 100; // API rate limit set to 100
+const limit = 10; // API rate limit set to 100
 let requestCount = 0;
 
 // Fetch products from Open Food Facts API
