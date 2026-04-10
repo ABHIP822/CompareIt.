@@ -2,7 +2,7 @@ let page = 1;
 const productList = document.getElementById('product-list');
 const searchInput = document.getElementById('search-input');
 const loadingIndicator = document.getElementById('loading');
-const limit = 20; // API rate limit set to 100
+const limit = 10; // API rate limit set to 100
 let requestCount = 0;
 let currentProducts = [];
 
@@ -15,7 +15,7 @@ const fetchProducts = async (query = "", pageNum = 1) => {
     
     //Add a small delay to avoid immediate repid-fire requests
     await new Promise(resolve =>
-    setTimeout(resolve, 800));
+    setTimeout(resolve, 1500));
 
     const userAgent = "CompareIt/1.0 (Contact: ap7258616@gmail.com)";
     const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${query}&page=${pageNum}&json=1`;
