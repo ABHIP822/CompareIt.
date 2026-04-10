@@ -83,11 +83,8 @@ productList.addEventListener('click', (e) => {
         const product = currentProducts[index];
 
         if (product) {
-            showProductDetails(product);
-        }
-    }
-});
-        }
+            showProductDetails(product);   
+ }
     }
 });
 
