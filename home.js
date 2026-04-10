@@ -33,7 +33,7 @@ const fetchProducts = async (query = "", pageNum = 1) => {
 // Display products on the page
 const displayProducts = (products) => {
     productList.innerHTML = ""; // Clear previous results
-    products.forEach(product => {
+    products.forEach(product, index) => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         productCard.innerHTML = `
@@ -77,8 +77,11 @@ productList.addEventListener('click', (e) => {
     if (e.target.closest('.product-card')) {
         const card = e.target.closest('.product-card');
         const index = Array.from(productList.children).indexOf(card);
-        const product = products[index];
+        const product =
+        currentProducts[index];//Fix
+        if (product)
         showProductDetails(product);
+        }
     }
 });
 
