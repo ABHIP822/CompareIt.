@@ -11,6 +11,10 @@ const fetchProducts = async (query = "", pageNum = 1) => {
         showRateLimit();
         return;
     }
+    
+    //Add a small delay to avoid immediate repid-fire requests
+    await new promise(resolve =>
+    setTimeout(resolve, 1000));
 
     const userAgent = "CompareIt/1.0 (Contact: ap7258616@gmail.com)";
     const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${query}&page=${pageNum}&json=1`;
