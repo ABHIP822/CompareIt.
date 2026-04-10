@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompareIt - Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+    <div id="login-screen">
+        <h1>Welcome to <span class="brand">CompareIt</span></h1>
+        <p class="subtitle">Create your profile to get started</p>
+
+        <div class="login-box">
+            <label>Name</label>
+            <input type="text" id="name" placeholder="Your name">
+
+            <label>Age</label>
+            <input type="number" id="age" placeholder="Your age">
+
+            <label>Gender</label>
+            <select id="gender">
+                <option value="">Select gender</option>
+                <option>Male</option>
+                <option>Female</option>
+            </select>
+
+            <label>Email</label>
+            <input type="email" id="email" placeholder="you@example.com">
+
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Min 6 characters">
+
+            <button onclick="handleLogin()">Create Profile & Sign Up</button>
+        </div>
+
+        <p class="toggle">Already have an account? <a href="#" onclick="showLogin()">Log in</a></p>
+        <p class="toggle">Or <a href="#" onclick="handleGuest()">Guest Account</a></p>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+</html>
