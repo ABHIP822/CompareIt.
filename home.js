@@ -13,7 +13,7 @@ const fetchProducts = async (query = "", pageNum = 1) => {
     }
     
     //Add a small delay to avoid immediate repid-fire requests
-    await new promise(resolve =>
+    await new Promise(resolve =>
     setTimeout(resolve, 800));
 
     const userAgent = "CompareIt/1.0 (Contact: ap7258616@gmail.com)";
@@ -33,7 +33,7 @@ const fetchProducts = async (query = "", pageNum = 1) => {
 // Display products on the page
 const displayProducts = (products) => {
     productList.innerHTML = ""; // Clear previous results
-    products.forEach(product, index) => {
+    products.forEach((product, index) => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         productCard.innerHTML = `
