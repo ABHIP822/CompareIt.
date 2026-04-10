@@ -1,0 +1,64 @@
+body {
+    background: #f4f6f8;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#login-screen {
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    width: 350px;
+    text-align: left;
+}
+
+.brand {
+    color: #0097a7;
+}
+
+.login-box label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+}
+
+.login-box input,
+.login-box select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.login-box button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    background: #0097a7;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+}
+
+.toggle {
+    margin-top: 15px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.toggle a {
+    color: #0097a7;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.toggle a:hover {
+    text-decoration: underline;
+}
