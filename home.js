@@ -3,7 +3,7 @@ const productList = document.getElementById('product-list');
 const searchInput = document.getElementById('search-input');
 const loadingIndicator = document.getElementById('loading');
 const limit = 20; // API rate limit set to 100
-let requestCount = 0;
+let requestCount = [];
 
 // Fetch products from Open Food Facts API
 const fetchProducts = async (query = "", pageNum = 1) => {
@@ -24,7 +24,8 @@ const fetchProducts = async (query = "", pageNum = 1) => {
             headers: { "User-Agent": userAgent }
         });
         const data = await response.json();
-        displayProducts(data.products);
+        currentProducts = data.products;
+        displayProducts(currentProducts);
     } catch (error) {
         console.error("Error fetching data:", error);
     }
@@ -73,9 +74,10 @@ searchInput.addEventListener('input', () => {
 });
 
 // Show product details when a product is clicked
-productList.addEventListener('click', (e) => {
-    if (e.target.closest('.product-card')) {
-        const card = e.target.closest('.product-card');
+productList.addEventListener('click',(e) => { const card =
+   e.target.closest('.product-card'); 
+        
+        if (card) {
         const index = Array.from(productList.children).indexOf(card);
         const product =
         currentProducts[index];//Fix
