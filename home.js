@@ -1,5 +1,5 @@
 let page = 1;
-let currentQuery = "food";
+let currentQuery = "food"; // തുടക്കത്തിൽ 'food' എന്നത് ലോഡ് ആകും
 let isLoading = false;
 let selectedProducts = [];
 
@@ -8,7 +8,7 @@ const searchInput = document.getElementById('search-input');
 const loadingIndicator = document.getElementById('loading');
 const scrollAnchor = document.getElementById('scroll-anchor');
 
-// ലോഡിംഗ് ആനിമേഷൻ (Skeleton) കാണിക്കാൻ
+// ലോഡിംഗ് ആനിമേഷൻ
 const showSkeletons = () => {
     for (let i = 0; i < 8; i++) {
         const skeleton = document.createElement('div');
@@ -20,8 +20,8 @@ const showSkeletons = () => {
 const fetchProducts = async (query, pageNum) => {
     if (isLoading) return;
     isLoading = true;
-
-    // ആദ്യ പേജ് ആണെങ്കിൽ പഴയത് മാറ്റി Skeleton കാണിക്കുക
+    
+    // ആദ്യ പേജ് ആണെങ്കിൽ മാത്രം പഴയത് മാറ്റി Skeleton കാണിക്കുക
     if (pageNum === 1) {
         productList.innerHTML = "";
         showSkeletons();
@@ -30,19 +30,18 @@ const fetchProducts = async (query, pageNum) => {
     }
 
     try {
+        // Open Food Facts API URL
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&page=${pageNum}&page_size=24&json=1`;
         
-        // API സ്പീഡ് കൂട്ടാൻ User-Agent സഹായിക്കും
         const response = await fetch(url, { 
-            headers: { 'User-Agent': 'CompareIt/1.0 (Contact: mail@example.com)' } 
+            headers: { 'User-Agent': 'CompareIt/1.0' } 
         });
         const data = await response.json();
 
-        if (pageNum === 1) productList.innerHTML = ""; // ലോഡിംഗ് കഴിഞ്ഞാൽ skeleton കളയുക
+        if (pageNum === 1) productList.innerHTML = ""; 
         displayProducts(data.products || [], pageNum === 1);
     } catch (e) {
         console.error("API Error:", e);
-        if(pageNum === 1) productList.innerHTML = "<p style='grid-column: 1/-1; text-align:center;'>Error connection. Try again!</p>";
     } finally {
         isLoading = false;
         loadingIndicator.classList.add('hidden');
@@ -71,6 +70,29 @@ const displayProducts = (products, isNew) => {
     });
 };
 
+// Search Logic - ഇവിടെയാണ് പ്രധാന മാറ്റം
+let timer;
+searchInput.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+        const query = searchInput.value.trim();
+        page = 1;
+        currentQuery = query || "food"; // സെർച്ച് ബോക്സ് കാലിയാണെങ്കിൽ തിരിച്ച് 'food' ലോഡ് ചെയ്യും
+        fetchProducts(currentQuery, 1);
+    }, 600);
+});
+
+// Infinite Scroll - താഴേക്ക് പോകുമ്പോൾ കൂടുതൽ ലോഡ് ചെയ്യാൻ
+const observer = new IntersectionObserver((entries) => {
+    // യൂസർ താഴെ എത്തുമ്പോൾ മാത്രം അടുത്ത പേജ് ലോഡ് ചെയ്യുക
+    if (entries[0].isIntersecting && !isLoading) {
+        page++;
+        fetchProducts(currentQuery, page);
+    }
+}, { threshold: 1.0 }); // കൃത്യമായി ആങ്കർ കാണുമ്പോൾ മാത്രം
+
+observer.observe(scrollAnchor);
+
 const toggleSelect = (product, card) => {
     const index = selectedProducts.findIndex(p => p._id === product._id);
     if (index > -1) {
@@ -81,7 +103,7 @@ const toggleSelect = (product, card) => {
             selectedProducts.push(product);
             card.classList.add('selected');
         } else {
-            alert("Already 2 selected! Deselect one to add this.");
+            alert("Already 2 selected!");
         }
     }
     updateCompareSection();
@@ -94,7 +116,7 @@ const updateCompareSection = () => {
     if (selectedProducts.length === 2) {
         section.classList.remove('hidden');
         const [p1, p2] = selectedProducts;
-
+        
         document.getElementById('compare1').innerHTML = `<img src="${p1.image_front_small_url || ''}"><p style="font-size:12px;"><b>${(p1.product_name || '').substring(0,15)}</b></p>`;
         document.getElementById('compare2').innerHTML = `<img src="${p2.image_front_small_url || ''}"><p style="font-size:12px;"><b>${(p2.product_name || '').substring(0,15)}</b></p>`;
 
@@ -104,20 +126,8 @@ const updateCompareSection = () => {
                 <div class="detail-col"><div class="detail-label">Brand</div> ${p2.brands || 'N/A'}</div>
             </div>
             <div class="detail-row">
-                <div class="detail-col"><div class="detail-label">Grade</div> ${p1.nutrition_grades?.toUpperCase() || 'N/A'}</div>
-                <div class="detail-col"><div class="detail-label">Grade</div> ${p2.nutrition_grades?.toUpperCase() || 'N/A'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-col"><div class="detail-label">Sugar/100g</div> ${p1.nutriments?.sugars_100g || 0}g</div>
-                <div class="detail-col"><div class="detail-label">Sugar/100g</div> ${p2.nutriments?.sugars_100g || 0}g</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-col"><div class="detail-label">Energy</div> ${p1.nutriments?.energy_value || 0} ${p1.nutriments?.energy_unit || 'kcal'}</div>
-                <div class="detail-col"><div class="detail-label">Energy</div> ${p2.nutriments?.energy_value || 0} ${p2.nutriments?.energy_unit || 'kcal'}</div>
-            </div>
-             <div class="detail-row">
-                <a href="https://world.openfoodfacts.org/product/${p1._id}" target="_blank" class="off-link">Details P1 🔗</a>
-                <a href="https://world.openfoodfacts.org/product/${p2._id}" target="_blank" class="off-link">Details P2 🔗</a>
+                <div class="detail-col"><div class="detail-label">Sugar</div> ${p1.nutriments?.sugars_100g || 0}g</div>
+                <div class="detail-col"><div class="detail-label">Sugar</div> ${p2.nutriments?.sugars_100g || 0}g</div>
             </div>
         `;
     } else {
@@ -125,32 +135,11 @@ const updateCompareSection = () => {
     }
 };
 
-// Search Logic with Debounce (സ്പീഡ് കൂട്ടാൻ സഹായിക്കും)
-let timer;
-searchInput.addEventListener('input', () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-        page = 1;
-        currentQuery = searchInput.value || "food";
-        fetchProducts(currentQuery, 1);
-    }, 600); // 0.6 സെക്കൻഡ് ടൈപ്പിംഗ് നിർത്തിയാൽ സെർച്ച് തുടങ്ങും
-});
-
-// Infinite Scroll
-const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !isLoading && currentQuery !== "") {
-        page++;
-        fetchProducts(currentQuery, page);
-    }
-}, { rootMargin: '100px' }); // താഴെ എത്തുന്നതിന് മുൻപേ ലോഡ് ചെയ്യാൻ
-
-observer.observe(scrollAnchor);
-
 document.getElementById('close-compare').onclick = () => {
     selectedProducts = [];
     document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
     updateCompareSection();
 };
 
-// Initial Load
-fetchProducts("food", 1);
+// വെബ്സൈറ്റ് തുറക്കുമ്പോൾ തന്നെ ഫുഡ് പ്രോഡക്റ്റുകൾ കാണിക്കാൻ
+fetchProducts(currentQuery, 1);
