@@ -188,3 +188,4 @@ document.getElementById('close-compare').onclick = () => {
 
 // Initial Load
 fetchProducts("food", 1);
+
