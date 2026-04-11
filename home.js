@@ -1,19 +1,21 @@
 let page = 1;
+
 const productList = document.getElementById('product-list');
 const searchInput = document.getElementById('search-input');
 const loadingIndicator = document.getElementById('loading');
+const scrollAnchor = document.getElementById('scroll-anchor');
 
-const limit = 30;
+const limit = 20;
 let requestCount = 0;
 let currentProducts = [];
 let isLoading = false;
 
-// Reset request count every minute
+// reset API count every minute
 setInterval(() => {
     requestCount = 0;
 }, 60000);
 
-// Fetch products
+// FETCH PRODUCTS
 const fetchProducts = async (query = "", pageNum = 1) => {
     if (isLoading) return;
 
@@ -23,9 +25,10 @@ const fetchProducts = async (query = "", pageNum = 1) => {
     }
 
     isLoading = true;
+    loadingIndicator.classList.remove('hidden');
 
     try {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 800));
 
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${query}&page=${pageNum}&json=1`;
 
@@ -34,23 +37,29 @@ const fetchProducts = async (query = "", pageNum = 1) => {
         const response = await fetch(url);
         const data = await response.json();
 
-        // Append new products (infinite scroll)
-        currentProducts = [...currentProducts, ...data.products];
+        // append data (important for scroll)
+        currentProducts = [...currentProducts, ...(data.products || [])];
 
         displayProducts(currentProducts);
 
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error:", error);
     }
 
+    loadingIndicator.classList.add('hidden');
     isLoading = false;
 };
 
-// Display products
+// DISPLAY PRODUCTS
 const displayProducts = (products) => {
-    productList.innerHTML = ""; // clear
+    productList.innerHTML = "";
 
-    products.forEach((product) => {
+    if (!products.length) {
+        productList.innerHTML = "<p>No products found</p>";
+        return;
+    }
+
+    products.forEach((product, index) => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
 
@@ -62,10 +71,15 @@ const displayProducts = (products) => {
         `;
 
         productList.appendChild(productCard);
+
+        // select toggle
+        productCard.addEventListener('click', () => {
+            productCard.classList.toggle('selected');
+        });
     });
 };
 
-// Infinite scroll
+// INFINITE SCROLL
 const observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting && !isLoading) {
         page++;
@@ -73,9 +87,9 @@ const observer = new IntersectionObserver((entries) => {
     }
 });
 
-observer.observe(loadingIndicator);
+observer.observe(scrollAnchor);
 
-// Search (debounce)
+// SEARCH
 let timeout = null;
 
 searchInput.addEventListener('input', () => {
@@ -90,7 +104,7 @@ searchInput.addEventListener('input', () => {
     }, 500);
 });
 
-// Product click → show details
+// PRODUCT DETAILS
 productList.addEventListener('click', (e) => {
     const card = e.target.closest('.product-card');
 
@@ -104,21 +118,21 @@ productList.addEventListener('click', (e) => {
     }
 });
 
-// Show details
 const showProductDetails = (product) => {
     document.getElementById('product-details').classList.remove('hidden');
 
     document.getElementById('detail-img').src = product.image_url || '';
     document.getElementById('detail-name').innerText = product.product_name || 'Unknown';
     document.getElementById('detail-brand').innerText = 'Brand: ' + (product.brands || 'N/A');
+    document.getElementById('detail-price').innerText = 'Category: ' + (product.categories || 'N/A');
     document.getElementById('detail-ingredients').innerText =
         'Ingredients: ' + (product.ingredients_text || 'N/A');
 };
 
-// Rate limit message
+// RATE LIMIT MESSAGE
 const showRateLimit = () => {
     document.getElementById('limit-message').classList.remove('hidden');
 };
 
-// Initial load
-fetchProducts();
+// INITIAL LOAD (IMPORTANT)
+fetchProducts("food", 1);
