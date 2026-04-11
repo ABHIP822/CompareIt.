@@ -1,6 +1,7 @@
 let page = 1;
 let currentQuery = "food";
 let isLoading = false;
+let selectedProducts = [];
 
 const productList = document.getElementById('product-list');
 const searchInput = document.getElementById('search-input');
@@ -11,66 +12,80 @@ const scrollAnchor = document.getElementById('scroll-anchor');
 const fetchProducts = async (query, pageNum) => {
     if (isLoading) return;
     isLoading = true;
-    
     loadingIndicator.classList.remove('hidden');
-    limitMessage.classList.add('hidden');
 
     try {
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&page=${pageNum}&page_size=20&json=1`;
-        
         const response = await fetch(url, {
-            headers: {
-                // ഈ ഹെഡർ ഉണ്ടെങ്കിൽ മാത്രമേ API ബ്ലോക്ക് ചെയ്യാതിരിക്കൂ
-                'User-Agent': 'CompareItApp/1.0 (contact: test@example.com)'
-            }
+            headers: { 'User-Agent': 'CompareItApp/1.0' }
         });
 
         if (response.status === 429) {
             limitMessage.classList.remove('hidden');
-            isLoading = false;
-            loadingIndicator.classList.add('hidden');
             return;
         }
 
         const data = await response.json();
         displayProducts(data.products || [], pageNum === 1);
-    } catch (error) {
-        console.error("Error:", error);
-    } finally {
+    } catch (e) { console.error(e); }
+    finally {
         isLoading = false;
         loadingIndicator.classList.add('hidden');
     }
 };
 
-const displayProducts = (products, isNewSearch) => {
-    if (isNewSearch) productList.innerHTML = "";
-
-    if (products.length === 0 && isNewSearch) {
-        productList.innerHTML = "<p>No products found.</p>";
-        return;
-    }
-
+const displayProducts = (products, isNew) => {
+    if (isNew) productList.innerHTML = "";
     products.forEach(product => {
         const card = document.createElement('div');
         card.className = 'product-card';
+        // നിലവിൽ സെലക്ട് ചെയ്തതാണോ എന്ന് നോക്കുന്നു
+        if(selectedProducts.find(p => p._id === product._id)) card.classList.add('selected');
+
         card.innerHTML = `
-            <img src="${product.image_front_small_url || 'https://via.placeholder.com/150'}" alt="product">
-            <h4>${product.product_name || 'Unknown'}</h4>
-            <p style="font-size:12px; color:gray;">${product.brands || 'No Brand'}</p>
+            <div class="select-indicator"></div>
+            <img src="${product.image_front_small_url || 'https://via.placeholder.com/150'}" alt="">
+            <h4 style="font-size:12px; margin:5px 0;">${product.product_name || 'Unknown'}</h4>
         `;
-        card.onclick = () => showDetails(product);
+
+        card.onclick = (e) => {
+            // ടിക് ബട്ടണിലോ കാർഡിലോ ക്ലിക്ക് ചെയ്താൽ സെലക്ട് ആകും
+            toggleSelect(product, card);
+        };
         productList.appendChild(card);
     });
 };
 
-const showDetails = (product) => {
-    const details = document.getElementById('product-details');
-    details.classList.remove('hidden');
-    document.getElementById('detail-img').src = product.image_front_url || '';
-    document.getElementById('detail-name').innerText = product.product_name || 'Unknown';
-    document.getElementById('detail-brand').innerText = "Brand: " + (product.brands || 'N/A');
-    document.getElementById('detail-ingredients').innerText = "Ingredients: " + (product.ingredients_text || 'Not listed');
-    details.scrollIntoView({ behavior: 'smooth' });
+const toggleSelect = (product, card) => {
+    const index = selectedProducts.findIndex(p => p._id === product._id);
+    if (index > -1) {
+        selectedProducts.splice(index, 1);
+        card.classList.remove('selected');
+    } else {
+        if (selectedProducts.length < 2) {
+            selectedProducts.push(product);
+            card.classList.add('selected');
+        } else {
+            alert("Please deselect a product to add a new one (Max 2).");
+        }
+    }
+    updateCompareSection();
+};
+
+const updateCompareSection = () => {
+    const section = document.getElementById('compare-section');
+    if (selectedProducts.length === 2) {
+        section.classList.remove('hidden');
+        selectedProducts.forEach((p, i) => {
+            document.getElementById(`compare${i+1}`).innerHTML = `
+                <img src="${p.image_front_small_url || ''}">
+                <p><strong>${p.product_name.substring(0,15)}..</strong></p>
+                <p>Grade: ${p.nutrition_grades?.toUpperCase() || 'N/A'}</p>
+            `;
+        });
+    } else {
+        section.classList.add('hidden');
+    }
 };
 
 // Search with Debounce
@@ -93,9 +108,10 @@ const observer = new IntersectionObserver((entries) => {
 });
 observer.observe(scrollAnchor);
 
-// Settings button
-document.getElementById('settings-btn').onclick = () => {
-    window.location.href = 'profile.html';
+document.getElementById('close-compare').onclick = () => {
+    selectedProducts = [];
+    document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+    updateCompareSection();
 };
 
 // Initial Load
