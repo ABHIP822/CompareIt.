@@ -43,14 +43,16 @@ const fetchProducts = async (query = "", pageNum = 1) => {
     } catch (error) {
         console.error("Error fetching data:", error);
     }
-    // CHANGE 2: reset loading
+    //CHANGE 1: loading reset safe place
     isLoading = false;
 };
 
 // Display products on the page
+
 const displayProducts = (products) => {
-    productList.innerHTML = ""; // Clear previous results
-    products.forEach((product, index) => {
+
+     // Clear previous results
+    products.forEach((product) => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         productCard.innerHTML = `
@@ -65,6 +67,7 @@ const displayProducts = (products) => {
         productCard.addEventListener('click', () => {
             productCard.classList.toggle('selected');
         });
+     */
     });
 };
 
@@ -73,8 +76,9 @@ const observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
         page++;
 
-        if (!isLoading) {
-        fetchProducts(searchInput.value, page);
+if (!isLoading) {
+        fetchProducts(searchInput.value,
+         page);
     }
   }
 }, { threshold: 1.0 });
