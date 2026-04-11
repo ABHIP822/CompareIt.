@@ -8,17 +8,56 @@ const searchInput = document.getElementById('search-input');
 const loadingIndicator = document.getElementById('loading');
 const scrollAnchor = document.getElementById('scroll-anchor');
 
+// സ്കെലറ്റൺ ലോഡിംഗ് കാണിക്കാനുള്ള ഫംഗ്ഷൻ
+const showSkeleton = () => {
+    const skeletons = Array(10).fill(0).map(() => `
+        <div class="product-card skeleton-card" style="background: #f0f0f0; border: none; pointer-events: none;">
+            <div style="width: 100%; height: 100px; background: #e0e0e0; border-radius: 8px; margin-bottom: 8px; animation: skeleton-blink 1.5s infinite;"></div>
+            <div style="width: 80%; height: 12px; background: #e0e0e0; border-radius: 4px; animation: skeleton-blink 1.5s infinite;"></div>
+        </div>
+    `).join('');
+    
+    // ആനിമേഷനായി ഒരു ചെറിയ സ്റ്റൈൽ ആഡ് ചെയ്യുന്നു
+    if (!document.getElementById('skeleton-style')) {
+        const style = document.createElement('style');
+        style.id = 'skeleton-style';
+        style.innerHTML = `
+            @keyframes skeleton-blink {
+                0% { opacity: 1; }
+                50% { opacity: 0.5; }
+                100% { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    productList.innerHTML += skeletons;
+};
+
 const fetchProducts = async (query, pageNum) => {
     if (isLoading) return;
     isLoading = true;
     loadingIndicator.classList.remove('hidden');
+    
+    // ലോഡ് ചെയ്യുന്ന സമയത്ത് സ്കെലറ്റൺ കാണിക്കുന്നു
+    if (pageNum === 1) productList.innerHTML = "";
+    showSkeleton();
 
     try {
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&page=${pageNum}&page_size=20&json=1`;
         const response = await fetch(url, { headers: { 'User-Agent': 'CompareItApp/1.0' } });
         const data = await response.json();
+        
+        // ലോഡിംഗ് കഴിഞ്ഞാൽ സ്കെലറ്റൺ മാറ്റാൻ ലിസ്റ്റ് ക്ലിയർ ചെയ്യുന്നു
+        const skeletons = document.querySelectorAll('.skeleton-card');
+        skeletons.forEach(s => s.remove());
+
         displayProducts(data.products || [], pageNum === 1);
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error(e); 
+        const skeletons = document.querySelectorAll('.skeleton-card');
+        skeletons.forEach(s => s.remove());
+    }
     finally {
         isLoading = false;
         loadingIndicator.classList.add('hidden');
@@ -66,11 +105,9 @@ const updateCompareSection = () => {
         section.classList.remove('hidden');
         const [p1, p2] = selectedProducts;
 
-        // മുകളിലെ കാർഡുകൾ
         document.getElementById('compare1').innerHTML = `<img src="${p1.image_front_small_url || ''}"><p><b>${p1.product_name.substring(0,15)}</b></p>`;
         document.getElementById('compare2').innerHTML = `<img src="${p2.image_front_small_url || ''}"><p><b>${p2.product_name.substring(0,15)}</b></p>`;
 
-        // ഓട്ടോമാറ്റിക്കായി ഡീറ്റെയിൽസ് താഴെ വരുന്നു
         detailsArea.innerHTML = `
             <div class="detail-row">
                 <div class="detail-col"><div class="detail-label">Brand:</div> ${p1.brands || 'N/A'}</div>
@@ -104,15 +141,21 @@ const updateCompareSection = () => {
     }
 };
 
-// Search & Scroll
 let timer;
 searchInput.oninput = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => { page = 1; fetchProducts(searchInput.value || "food", 1); }, 800);
+    timer = setTimeout(() => { 
+        page = 1; 
+        currentQuery = searchInput.value || "food";
+        fetchProducts(currentQuery, 1); 
+    }, 800);
 };
 
 const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !isLoading) { page++; fetchProducts(currentQuery, page); }
+    if (entries[0].isIntersecting && !isLoading) { 
+        page++; 
+        fetchProducts(currentQuery, page); 
+    }
 });
 observer.observe(scrollAnchor);
 
