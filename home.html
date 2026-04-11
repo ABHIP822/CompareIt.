@@ -15,34 +15,26 @@
         </div>
     </header>
 
-    <!-- SEARCH -->
-    <input type="text" id="search-input" placeholder="Search products...">
+    <input type="text" id="search-input" placeholder="Search products (e.g. Milk, Chocolate)...">
 
-    <!-- LOADING -->
     <div id="loading" class="hidden">Loading...</div>
 
-    <!-- RATE LIMIT -->
     <div id="limit-message" class="hidden limit-message">
         API rate limit reached. Please try again later.
     </div>
 
     <h2 class="section-title">All Food</h2>
 
-    <!-- PRODUCT LIST -->
     <div id="product-list">
-        <p>Search products to display results</p>
+        <p>Searching for products...</p>
     </div>
 
-    <!-- IMPORTANT: SCROLL TRIGGER -->
-    <div id="scroll-anchor" style="height: 60px;"></div>
+    <div id="scroll-anchor" style="height: 20px;"></div>
 
-    <!-- COMPARE -->
-    <button id="compare-btn">Compare Selected Products</button>
-
-    <!-- PRODUCT DETAILS -->
     <div id="product-details" class="hidden">
+        <hr>
         <h2>Product Details</h2>
-        <img id="detail-img" src="" alt="product Image">
+        <img id="detail-img" src="" alt="product Image" style="max-width: 200px; display: block; margin: auto;">
         <h3 id="detail-name"></h3>
         <p id="detail-brand"></p>
         <p id="detail-price"></p>
@@ -54,21 +46,10 @@
         </div>
     </div>
 
-    <!-- COMPARISON -->
-    <div id="compare-section" class="hidden">
-        <h2>Comparison</h2>
-        <div class="compare-container">
-            <div id="compare1"></div>
-            <div id="compare2"></div>
-        </div>
-    </div>
-
     <footer>
-        <p>CompareIt | powered by Open Food Facts API</p>
+        <p>CompareIt | Powered by Open Food Facts API</p>
     </footer>
 
-    <!-- JS LINK (VERY IMPORTANT) -->
     <script src="home.js"></script>
-
 </body>
 </html>
