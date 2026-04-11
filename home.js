@@ -10,20 +10,22 @@ const scrollAnchor = document.getElementById('scroll-anchor');
 const compareSection = document.getElementById('compare-section');
 const detailsArea = document.getElementById('full-details-area');
 
-// 1. ലോഡിങ് സമയത്ത് ഷിമ്മർ ആനിമേഷൻ കാണിക്കുന്നു
+/**
+ * 1. ലോഡിങ് സമയത്ത് കാണിക്കേണ്ട ഷിമ്മർ ആനിമേഷൻ
+ * പ്രോഡക്റ്റ് വരാൻ വൈകുന്ന ആ സമയം ഇത് മിന്നിത്തിളങ്ങിക്കൊണ്ടിരിക്കും.
+ */
 const showShimmer = () => {
+    loadingIndicator.innerHTML = ""; // പഴയ കണ്ടന്റ് മാറ്റുന്നു
     loadingIndicator.classList.remove('hidden');
-    loadingIndicator.style.display = "grid"; 
-    loadingIndicator.innerHTML = ""; 
     
-    // 8 ഷിമ്മർ കാർഡുകൾ ആനിമേഷനായി ഉണ്ടാക്കുന്നു
-    for (let i = 0; i < 8; i++) { 
+    // 4 ഷിമ്മർ കാർഡുകൾ ലോഡിങ് സമയത്ത് കാണിക്കുന്നു
+    for (let i = 0; i < 4; i++) {
         const shimmerCard = document.createElement('div');
         shimmerCard.className = 'shimmer-card'; 
         shimmerCard.innerHTML = `
-            <div class="shimmer-img pulse" style="background: #eee; height: 100px; margin-bottom: 10px; border-radius: 8px;"></div>
-            <div class="shimmer-line pulse" style="background: #eee; height: 15px; width: 80%; margin-bottom: 8px; border-radius: 4px;"></div>
-            <div class="shimmer-line short pulse" style="background: #eee; height: 15px; width: 50%; border-radius: 4px;"></div>
+            <div class="shimmer-img pulse"></div>
+            <div class="shimmer-line pulse"></div>
+            <div class="shimmer-line short pulse"></div>
         `;
         loadingIndicator.appendChild(shimmerCard);
     }
@@ -31,34 +33,28 @@ const showShimmer = () => {
 
 const hideShimmer = () => {
     loadingIndicator.classList.add('hidden');
-    loadingIndicator.style.display = "none";
 };
 
-// API-ൽ നിന്ന് വിവരങ്ങൾ എടുക്കുന്നു
+// API Fetching
 const fetchProducts = async (query, pageNum) => {
     if (isLoading) return;
     isLoading = true;
-    
-    // ഡാറ്റ വരുന്നതിന് മുൻപ് ആനിമേഷൻ കാണിക്കാൻ
-    showShimmer(); 
+    showShimmer(); // ലോഡിങ് ആനിമേഷൻ തുടങ്ങുന്നു
 
     try {
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&page=${pageNum}&page_size=20&json=1`;
         const response = await fetch(url, { headers: { 'User-Agent': 'CompareItApp/1.0' } });
         const data = await response.json();
-        
-        // ഡാറ്റ വന്നുകഴിഞ്ഞാൽ ആനിമേഷൻ മാറ്റുക
-        hideShimmer();
         displayProducts(data.products || [], pageNum === 1);
     } catch (e) {
-        console.error("API Error:", e);
-        hideShimmer();
+        console.error("Error fetching products:", e);
     } finally {
         isLoading = false;
+        hideShimmer(); // ലോഡിങ് കഴിഞ്ഞാൽ ആനിമേഷൻ നിർത്തുന്നു
     }
 };
 
-// പ്രോഡക്റ്റുകൾ സ്ക്രീനിൽ കാണിക്കുന്നു
+// ലിസ്റ്റിൽ പ്രോഡക്റ്റുകൾ കാണിക്കുന്നു
 const displayProducts = (products, isNew) => {
     if (isNew) productList.innerHTML = "";
     
@@ -73,22 +69,26 @@ const displayProducts = (products, isNew) => {
             <div class="select-indicator" id="check-${product._id}"></div>
             <div class="card-content">
                 <img src="${product.image_front_small_url || 'https://via.placeholder.com/150?text=No+Image'}" alt="">
-                <h4 style="font-size:11px; margin:5px 0; color:#333;">${product.product_name}</h4>
+                <h4 style="font-size:11px; margin:5px 0;">${product.product_name}</h4>
                 <div class="grade-badge">${product.nutrition_grades || 'N/A'}</div>
             </div>
         `;
 
+        // Checkbox-ൽ തൊട്ടാൽ മാത്രം കംപാരിസൺ സെലക്ഷൻ
         const indicator = card.querySelector('.select-indicator');
         indicator.onclick = (e) => {
             e.stopPropagation(); 
             toggleSelect(product, card);
         };
 
+        // കാർഡിൽ (ഇമേജിലോ പേരിലോ) തൊട്ടാൽ ഫുൾ ഡീറ്റെയിൽസ്
         card.onclick = () => showSingleProductDetails(product);
+
         productList.appendChild(card);
     });
 };
 
+// സിംഗിൾ പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് കാണിക്കുന്നു (ഓർഡർ: Image -> Name -> Grade -> Company -> Details)
 const showSingleProductDetails = (p) => {
     compareSection.classList.remove('hidden');
     document.getElementById('compare-vs').style.display = 'none';
@@ -96,34 +96,33 @@ const showSingleProductDetails = (p) => {
     
     document.getElementById('compare1').innerHTML = `
         <img src="${p.image_front_small_url || ''}" style="width:130px; height:130px; object-fit:contain; border-radius:10px;">
-        <h2 style="margin:10px 0; font-size:18px;">${p.product_name}</h2>
+        <h2 style="margin:10px 0; color:#333;">${p.product_name}</h2>
     `;
 
     detailsArea.innerHTML = `
         <div style="padding:15px; text-align:left; border-top:1px solid #eee;">
             <div style="margin-bottom:12px;">
                 <span style="color:#666; font-weight:bold;">Grade:</span> 
-                <span style="font-size:22px; font-weight:900; color:#d32f2f; text-transform:uppercase; margin-left:10px;">${p.nutrition_grades || 'N/A'}</span>
+                <span style="font-size:22px; font-weight:900; color:#2e7d32; text-transform:uppercase; margin-left:10px;">${p.nutrition_grades || 'N/A'}</span>
             </div>
             <div style="margin-bottom:12px;">
                 <span style="color:#666; font-weight:bold;">Company / Brand:</span> 
-                <p style="font-size:16px; margin:5px 0; color:#222;">${p.brands || 'Not Specified'}</p>
+                <p style="font-size:16px; margin:5px 0; color:#444;">${p.brands || 'Not Specified'}</p>
             </div>
-            <hr>
-            <div style="margin-top:15px;">
-                <span style="color:#666; font-weight:bold;">All Packaging Details:</span>
-                <p style="font-size:14px; color:#444; line-height:1.6; margin-top:8px;">${p.ingredients_text || 'No description available for this product.'}</p>
+            <div style="margin-top:20px;">
+                <span style="color:#666; font-weight:bold;">Full Product Details:</span>
+                <p style="font-size:14px; color:#555; line-height:1.5; margin-top:8px;">${p.ingredients_text || 'No description available for this product.'}</p>
             </div>
-            <div style="background:#f8f9fa; padding:12px; border-radius:8px; margin-top:15px; font-size:12px;">
-                <b>Nutriments (per 100g):</b><br>
-                Energy: ${p.nutriments?.energy_100g || 0} kcal | 
-                Sugar: ${p.nutriments?.sugars_100g || 0} g | 
-                Fat: ${p.nutriments?.fat_100g || 0} g
+            <div style="background:#f0f4f7; padding:12px; border-radius:8px; margin-top:15px; font-family:monospace;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Energy:</span> <b>${p.nutriments?.energy_100g || 0} kcal</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Sugar:</span> <b>${p.nutriments?.sugars_100g || 0} g</b></div>
+                <div style="display:flex; justify-content:space-between;"><span>Fat:</span> <b>${p.nutriments?.fat_100g || 0} g</b></div>
             </div>
         </div>
     `;
 };
 
+// Comparison logic (2 products)
 const toggleSelect = (product, card) => {
     const index = selectedProducts.findIndex(p => p._id === product._id);
     if (index > -1) {
@@ -148,44 +147,44 @@ const updateCompareView = () => {
         const [p1, p2] = selectedProducts;
         document.getElementById('compare1').innerHTML = `<img src="${p1.image_front_small_url || ''}"><p>${p1.product_name}</p>`;
         document.getElementById('compare2').innerHTML = `<img src="${p2.image_front_small_url || ''}"><p>${p2.product_name}</p>`;
-        
-        detailsArea.innerHTML = `
-            <div class="detail-row">
-                <div class="detail-col"><b>Grade:</b> ${p1.nutrition_grades || 'N/A'}</div>
-                <div class="detail-col"><b>Grade:</b> ${p2.nutrition_grades || 'N/A'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-col"><b>Brand:</b> ${p1.brands || 'N/A'}</div>
-                <div class="detail-col"><b>Brand:</b> ${p2.brands || 'N/A'}</div>
-            </div>
-        `;
+        detailsArea.innerHTML = generateCompareTable(p1, p2);
     } else {
         compareSection.classList.add('hidden');
     }
 };
 
+const generateCompareTable = (p1, p2) => {
+    return `
+        <div class="detail-row">
+            <div class="detail-col"><b>Grade:</b> ${p1.nutrition_grades || 'N/A'}</div>
+            <div class="detail-col"><b>Grade:</b> ${p2.nutrition_grades || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-col"><b>Brand:</b> ${p1.brands || 'N/A'}</div>
+            <div class="detail-col"><b>Brand:</b> ${p2.brands || 'N/A'}</div>
+        </div>
+    `;
+};
+
+// Search Timer
 let timer;
 searchInput.oninput = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => { 
-        page = 1; 
-        currentQuery = searchInput.value || "food"; 
-        fetchProducts(currentQuery, 1); 
-    }, 800);
+    timer = setTimeout(() => { page = 1; currentQuery = searchInput.value || "food"; fetchProducts(currentQuery, 1); }, 800);
 };
 
+// Infinite Scroll
 const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !isLoading) { 
-        page++; 
-        fetchProducts(currentQuery, page); 
-    }
+    if (entries[0].isIntersecting && !isLoading) { page++; fetchProducts(currentQuery, page); }
 });
 observer.observe(scrollAnchor);
 
+// Close Modal
 document.getElementById('close-compare').onclick = () => {
     selectedProducts = [];
     document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
     compareSection.classList.add('hidden');
 };
 
+// Initial Load
 fetchProducts("food", 1);
