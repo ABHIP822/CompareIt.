@@ -12,19 +12,18 @@ const detailsArea = document.getElementById('full-details-area');
 
 // 1. ലോഡിങ് സമയത്ത് ഷിമ്മർ ആനിമേഷൻ കാണിക്കുന്നു
 const showShimmer = () => {
-    // ലോഡിംഗ് ഇൻഡിക്കേറ്റർ കാണിക്കുന്നു
     loadingIndicator.classList.remove('hidden');
-    loadingIndicator.style.display = "grid"; // Grid ആയി കാണിക്കാൻ
+    loadingIndicator.style.display = "grid"; 
     loadingIndicator.innerHTML = ""; 
     
-    // 4 ഷിമ്മർ കാർഡുകൾ ആനിമേഷനായി ഉണ്ടാക്കുന്നു
-    for (let i = 0; i < 8; i++) { // എണ്ണം വേണമെങ്കിൽ കൂട്ടാം
+    // 8 ഷിമ്മർ കാർഡുകൾ ആനിമേഷനായി ഉണ്ടാക്കുന്നു
+    for (let i = 0; i < 8; i++) { 
         const shimmerCard = document.createElement('div');
         shimmerCard.className = 'shimmer-card'; 
         shimmerCard.innerHTML = `
-            <div class="shimmer-img pulse"></div>
-            <div class="shimmer-line pulse"></div>
-            <div class="shimmer-line short pulse"></div>
+            <div class="shimmer-img pulse" style="background: #eee; height: 100px; margin-bottom: 10px; border-radius: 8px;"></div>
+            <div class="shimmer-line pulse" style="background: #eee; height: 15px; width: 80%; margin-bottom: 8px; border-radius: 4px;"></div>
+            <div class="shimmer-line short pulse" style="background: #eee; height: 15px; width: 50%; border-radius: 4px;"></div>
         `;
         loadingIndicator.appendChild(shimmerCard);
     }
@@ -89,8 +88,6 @@ const displayProducts = (products, isNew) => {
         productList.appendChild(card);
     });
 };
-
-// താഴെയുള്ള ബാക്കി ഫംഗ്ഷനുകളിൽ (showSingleProductDetails, toggleSelect, updateCompareView) മാറ്റമില്ല...
 
 const showSingleProductDetails = (p) => {
     compareSection.classList.remove('hidden');
@@ -170,11 +167,18 @@ const updateCompareView = () => {
 let timer;
 searchInput.oninput = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => { page = 1; currentQuery = searchInput.value || "food"; fetchProducts(currentQuery, 1); }, 800);
+    timer = setTimeout(() => { 
+        page = 1; 
+        currentQuery = searchInput.value || "food"; 
+        fetchProducts(currentQuery, 1); 
+    }, 800);
 };
 
 const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !isLoading) { page++; fetchProducts(currentQuery, page); }
+    if (entries[0].isIntersecting && !isLoading) { 
+        page++; 
+        fetchProducts(currentQuery, page); 
+    }
 });
 observer.observe(scrollAnchor);
 
