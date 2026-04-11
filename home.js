@@ -1,4 +1,4 @@
-Let page = 1;
+let page = 1;
 let currentQuery = "food";
 let isLoading = false;
 let selectedProducts = [];
@@ -12,11 +12,13 @@ const detailsArea = document.getElementById('full-details-area');
 
 /**
  * 1. ലോഡിങ് സമയത്ത് കാണിക്കേണ്ട ഷിമ്മർ ആനിമേഷൻ
+ * പ്രോഡക്റ്റ് വരാൻ വൈകുന്ന ആ സമയം ഇത് മിന്നിത്തിളങ്ങിക്കൊണ്ടിരിക്കും.
  */
 const showShimmer = () => {
-    loadingIndicator.innerHTML = ""; 
+    loadingIndicator.innerHTML = ""; // പഴയ കണ്ടന്റ് മാറ്റുന്നു
     loadingIndicator.classList.remove('hidden');
     
+    // 4 ഷിമ്മർ കാർഡുകൾ ലോഡിങ് സമയത്ത് കാണിക്കുന്നു
     for (let i = 0; i < 4; i++) {
         const shimmerCard = document.createElement('div');
         shimmerCard.className = 'shimmer-card'; 
@@ -37,7 +39,7 @@ const hideShimmer = () => {
 const fetchProducts = async (query, pageNum) => {
     if (isLoading) return;
     isLoading = true;
-    showShimmer();
+    showShimmer(); // ലോഡിങ് ആനിമേഷൻ തുടങ്ങുന്നു
 
     try {
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&page=${pageNum}&page_size=20&json=1`;
@@ -48,7 +50,7 @@ const fetchProducts = async (query, pageNum) => {
         console.error("Error fetching products:", e);
     } finally {
         isLoading = false;
-        hideShimmer();
+        hideShimmer(); // ലോഡിങ് കഴിഞ്ഞാൽ ആനിമേഷൻ നിർത്തുന്നു
     }
 };
 
@@ -72,19 +74,21 @@ const displayProducts = (products, isNew) => {
             </div>
         `;
 
+        // Checkbox-ൽ തൊട്ടാൽ മാത്രം കംപാരിസൺ സെലക്ഷൻ
         const indicator = card.querySelector('.select-indicator');
         indicator.onclick = (e) => {
             e.stopPropagation(); 
             toggleSelect(product, card);
         };
 
+        // കാർഡിൽ (ഇമേജിലോ പേരിലോ) തൊട്ടാൽ ഫുൾ ഡീറ്റെയിൽസ്
         card.onclick = () => showSingleProductDetails(product);
 
         productList.appendChild(card);
     });
 };
 
-// സിംഗിൾ പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് (Image -> Name -> Guide -> All OpenFood Details)
+// സിംഗിൾ പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് കാണിക്കുന്നു (ഓർഡർ: Image -> Name -> Grade -> Company -> Details)
 const showSingleProductDetails = (p) => {
     compareSection.classList.remove('hidden');
     document.getElementById('compare-vs').style.display = 'none';
@@ -105,17 +109,14 @@ const showSingleProductDetails = (p) => {
                 <span style="color:#666; font-weight:bold;">Company / Brand:</span> 
                 <p style="font-size:16px; margin:5px 0; color:#444;">${p.brands || 'Not Specified'}</p>
             </div>
-            <div style="margin-bottom:12px;">
-                <span style="color:#666; font-weight:bold;">Ingredients:</span>
-                <p style="font-size:14px; color:#555; line-height:1.5; margin-top:8px;">${p.ingredients_text || 'No data available.'}</p>
+            <div style="margin-top:20px;">
+                <span style="color:#666; font-weight:bold;">Full Product Details:</span>
+                <p style="font-size:14px; color:#555; line-height:1.5; margin-top:8px;">${p.ingredients_text || 'No description available for this product.'}</p>
             </div>
-            <div style="background:#f0f4f7; padding:12px; border-radius:8px; margin-top:15px;">
-                <h4 style="margin-top:0;">Nutritional Info (per 100g)</h4>
+            <div style="background:#f0f4f7; padding:12px; border-radius:8px; margin-top:15px; font-family:monospace;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Energy:</span> <b>${p.nutriments?.energy_100g || 0} kcal</b></div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Sugar:</span> <b>${p.nutriments?.sugars_100g || 0} g</b></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Fat:</span> <b>${p.nutriments?.fat_100g || 0} g</b></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Proteins:</span> <b>${p.nutriments?.proteins_100g || 0} g</b></div>
-                <div style="display:flex; justify-content:space-between;"><span>Salt:</span> <b>${p.nutriments?.salt_100g || 0} g</b></div>
+                <div style="display:flex; justify-content:space-between;"><span>Fat:</span> <b>${p.nutriments?.fat_100g || 0} g</b></div>
             </div>
         </div>
     `;
@@ -144,48 +145,23 @@ const updateCompareView = () => {
         document.getElementById('compare-vs').style.display = 'block';
         document.getElementById('compare2').style.display = 'block';
         const [p1, p2] = selectedProducts;
-        
-        document.getElementById('compare1').innerHTML = `
-            <img src="${p1.image_front_small_url || ''}">
-            <p style="font-weight:bold; font-size:12px;">${p1.product_name}</p>
-            <div style="font-size:18px; color:green; font-weight:bold;">${p1.nutrition_grades?.toUpperCase() || 'N/A'}</div>
-        `;
-        document.getElementById('compare2').innerHTML = `
-            <img src="${p2.image_front_small_url || ''}">
-            <p style="font-weight:bold; font-size:12px;">${p2.product_name}</p>
-            <div style="font-size:18px; color:green; font-weight:bold;">${p2.nutrition_grades?.toUpperCase() || 'N/A'}</div>
-        `;
-        
+        document.getElementById('compare1').innerHTML = `<img src="${p1.image_front_small_url || ''}"><p>${p1.product_name}</p>`;
+        document.getElementById('compare2').innerHTML = `<img src="${p2.image_front_small_url || ''}"><p>${p2.product_name}</p>`;
         detailsArea.innerHTML = generateCompareTable(p1, p2);
     } else {
         compareSection.classList.add('hidden');
     }
 };
 
-// കംപാരിസണിലും എല്ലാ ഡീറ്റെയിൽസും വരാനുള്ള ഫംഗ്ഷൻ
 const generateCompareTable = (p1, p2) => {
     return `
-        <div class="detail-row" style="background:#f9f9f9; padding:10px; border-bottom:1px solid #ddd;">
+        <div class="detail-row">
+            <div class="detail-col"><b>Grade:</b> ${p1.nutrition_grades || 'N/A'}</div>
+            <div class="detail-col"><b>Grade:</b> ${p2.nutrition_grades || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
             <div class="detail-col"><b>Brand:</b> ${p1.brands || 'N/A'}</div>
             <div class="detail-col"><b>Brand:</b> ${p2.brands || 'N/A'}</div>
-        </div>
-        <div class="detail-row" style="padding:10px; border-bottom:1px solid #ddd;">
-            <div class="detail-col"><b>Ingredients:</b> <small>${p1.ingredients_text || 'N/A'}</small></div>
-            <div class="detail-col"><b>Ingredients:</b> <small>${p2.ingredients_text || 'N/A'}</small></div>
-        </div>
-        <div class="detail-row" style="background:#eef2f3; padding:10px;">
-            <div class="detail-col">
-                <b>Nutriments:</b><br>
-                Energy: ${p1.nutriments?.energy_100g || 0} kcal<br>
-                Sugar: ${p1.nutriments?.sugars_100g || 0}g<br>
-                Fat: ${p1.nutriments?.fat_100g || 0}g
-            </div>
-            <div class="detail-col">
-                <b>Nutriments:</b><br>
-                Energy: ${p2.nutriments?.energy_100g || 0} kcal<br>
-                Sugar: ${p2.nutriments?.sugars_100g || 0}g<br>
-                Fat: ${p2.nutriments?.fat_100g || 0}g
-            </div>
         </div>
     `;
 };
@@ -194,19 +170,12 @@ const generateCompareTable = (p1, p2) => {
 let timer;
 searchInput.oninput = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => { 
-        page = 1; 
-        currentQuery = searchInput.value || "food"; 
-        fetchProducts(currentQuery, 1); 
-    }, 800);
+    timer = setTimeout(() => { page = 1; currentQuery = searchInput.value || "food"; fetchProducts(currentQuery, 1); }, 800);
 };
 
 // Infinite Scroll
 const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !isLoading) { 
-        page++; 
-        fetchProducts(currentQuery, page); 
-    }
+    if (entries[0].isIntersecting && !isLoading) { page++; fetchProducts(currentQuery, page); }
 });
 observer.observe(scrollAnchor);
 
