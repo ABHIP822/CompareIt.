@@ -35,11 +35,14 @@ const fetchProducts = async (query = "", pageNum = 1) => {
             headers: { "User-Agent": userAgent }
         });
         const data = await response.json();
-        currentProducts = data.products;
+        currentProducts = 
+[...currentProducts, ...data.products];
         displayProducts(currentProducts);
     } catch (error) {
         console.error("Error fetching data:", error);
     }
+    // CHANGE 2: loading reset (IMPORTANT)
+    isLoading = false;
 };
 
 // Display products on the page
@@ -67,8 +70,11 @@ const displayProducts = (products) => {
 const observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
         page++;
+
+        if (!isLoading) {
         fetchProducts(searchInput.value, page);
     }
+  }
 }, { threshold: 1.0 });
 observer.observe(loadingIndicator);
 
@@ -79,7 +85,10 @@ searchInput.addEventListener('input', () => {
     timeout = setTimeout(() => {
         productList.innerHTML = ""; // Clear current list
         page = 1;
-        requestCount = 0; // Reset request count
+        requestCount = 0; 
+// CHANGE 4: reset old products(IMPORTANT)
+        currentProducts = [];
+
         fetchProducts(searchInput.value, page);
     }, 500);
 });
