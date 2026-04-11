@@ -1,5 +1,5 @@
 let page = 1;
-let currentQuery = "food"; // ഇത് എപ്പോഴും അപ്ഡേറ്റ് ചെയ്യപ്പെടണം
+let currentQuery = "food";
 let isLoading = false;
 let selectedProducts = [];
 
@@ -7,67 +7,62 @@ const productList = document.getElementById('product-list');
 const searchInput = document.getElementById('search-input');
 const loadingIndicator = document.getElementById('loading');
 const scrollAnchor = document.getElementById('scroll-anchor');
+const compareSection = document.getElementById('compare-section');
+const detailsArea = document.getElementById('full-details-area');
 
-// Fetch Products Function
+// API-ൽ നിന്ന് പ്രോഡക്റ്റ് എടുക്കുന്ന ഫങ്ക്ഷൻ
 const fetchProducts = async (query, pageNum) => {
     if (isLoading) return;
     isLoading = true;
     loadingIndicator.classList.remove('hidden');
 
     try {
-        // കുറച്ചുകൂടി കൃത്യമായ API URL
-        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&page=${pageNum}&page_size=24&json=1`;
-        
-        const response = await fetch(url, { 
-            headers: { 'User-Agent': 'CompareItApp/1.0' } 
-        });
-        
+        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&page=${pageNum}&page_size=20&json=1`;
+        const response = await fetch(url, { headers: { 'User-Agent': 'CompareItApp/1.0' } });
         const data = await response.json();
-        
-        if (data.products && data.products.length > 0) {
-            displayProducts(data.products, pageNum === 1);
-        } else if (pageNum === 1) {
-            productList.innerHTML = "<p style='text-align:center; width:100%;'>No products found.</p>";
-        }
+        displayProducts(data.products || [], pageNum === 1);
     } catch (e) { 
-        console.error("Error fetching data:", e); 
-        if(pageNum === 1) productList.innerHTML = "<p style='text-align:center; width:100%;'>Error loading products.</p>";
-    }
-    finally {
+        console.error("Fetch error:", e); 
+    } finally {
         isLoading = false;
         loadingIndicator.classList.add('hidden');
     }
 };
 
+// ലിസ്റ്റിൽ പ്രോഡക്റ്റുകൾ കാണിക്കുന്നു
 const displayProducts = (products, isNew) => {
-    if (isNew) {
-        productList.innerHTML = "";
-        window.scrollTo(0,0); // സെർച്ച് ചെയ്യുമ്പോൾ മുകളിലേക്ക് പോകാൻ
-    }
-
+    if (isNew) productList.innerHTML = "";
+    
     products.forEach(product => {
-        // ചിലപ്പോൾ പേര് ഉണ്ടാവില്ല, അത് ഒഴിവാക്കാൻ
         if (!product.product_name) return;
 
         const card = document.createElement('div');
         card.className = 'product-card';
-        
-        // നേരത്തെ സെലക്ട് ചെയ്തതാണെങ്കിൽ ഹൈലൈറ്റ് നിലനിർത്താൻ
-        if(selectedProducts.find(p => p._id === product._id)) {
-            card.classList.add('selected');
-        }
+        if(selectedProducts.find(p => p._id === product._id)) card.classList.add('selected');
 
         card.innerHTML = `
-            <div class="select-indicator"></div>
-            <img src="${product.image_front_small_url || 'https://via.placeholder.com/150?text=No+Image'}" alt="product">
-            <h4 style="font-size:11px; margin:5px 0; height:30px; overflow:hidden;">${product.product_name}</h4>
-            <p style="font-size:10px; color:gray;">${product.brands || ''}</p>
+            <div class="select-indicator" id="check-${product._id}"></div>
+            <div class="card-content">
+                <img src="${product.image_front_small_url || 'https://via.placeholder.com/150?text=No+Image'}" alt="">
+                <h4 style="font-size:11px; margin:5px 0;">${product.product_name}</h4>
+            </div>
         `;
-        card.onclick = () => toggleSelect(product, card);
+
+        // വലതുവശത്തെ സർക്കിളിൽ (Checkbox) തൊട്ടാൽ കംപാരിസൺ
+        const indicator = card.querySelector('.select-indicator');
+        indicator.onclick = (e) => {
+            e.stopPropagation(); // കാർഡ് ക്ലിക്കിനെ തടയാൻ
+            toggleSelect(product, card);
+        };
+
+        // ഇമേജിലോ പേരിലോ (Card) തൊട്ടാൽ സിംഗിൾ പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ്
+        card.onclick = () => showSingleProductDetails(product);
+
         productList.appendChild(card);
     });
 };
 
+// കംപാരിസൺ സെലക്ഷൻ മാനേജ് ചെയ്യുന്നു
 const toggleSelect = (product, card) => {
     const index = selectedProducts.findIndex(p => p._id === product._id);
     if (index > -1) {
@@ -81,82 +76,119 @@ const toggleSelect = (product, card) => {
             alert("Please deselect a product to add a new one.");
         }
     }
-    updateCompareSection();
+    updateCompareView();
 };
 
-const updateCompareSection = () => {
-    const section = document.getElementById('compare-section');
-    const detailsArea = document.getElementById('full-details-area');
-
+// കംപാരിസൺ വ്യൂ അപ്ഡേറ്റ് ചെയ്യുന്നു
+const updateCompareView = () => {
     if (selectedProducts.length === 2) {
-        section.classList.remove('hidden');
+        compareSection.classList.remove('hidden');
         const [p1, p2] = selectedProducts;
 
-        document.getElementById('compare1').innerHTML = `<img src="${p1.image_front_small_url || ''}"><p><b>${p1.product_name.substring(0,20)}</b></p>`;
-        document.getElementById('compare2').innerHTML = `<img src="${p2.image_front_small_url || ''}"><p><b>${p2.product_name.substring(0,20)}</b></p>`;
+        document.getElementById('compare1').innerHTML = `<img src="${p1.image_front_small_url || ''}"><p><b>${p1.product_name.substring(0,15)}</b></p>`;
+        document.getElementById('compare2').innerHTML = `<img src="${p2.image_front_small_url || ''}"><p><b>${p2.product_name.substring(0,15)}</b></p>`;
 
-        // ഡീറ്റെയിൽസ് കൃത്യമായി എടുക്കാൻ (Null checks added)
-        const getNutrient = (p, key) => p.nutriments?.[key] !== undefined ? p.nutriments[key] : 'N/A';
-
-        detailsArea.innerHTML = `
-            <div class="detail-row">
-                <div class="detail-col"><div class="detail-label">Brand:</div> ${p1.brands || 'N/A'}</div>
-                <div class="detail-col"><div class="detail-label">Brand:</div> ${p2.brands || 'N/A'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-col"><div class="detail-label">Nutrition Grade:</div> <span style="text-transform:uppercase; font-weight:bold;">${p1.nutrition_grades || 'N/A'}</span></div>
-                <div class="detail-col"><div class="detail-label">Nutrition Grade:</div> <span style="text-transform:uppercase; font-weight:bold;">${p2.nutrition_grades || 'N/A'}</span></div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-col"><div class="detail-label">Sugar (100g):</div> ${getNutrient(p1, 'sugars_100g')}${p1.nutriments?.sugars_100g ? 'g' : ''}</div>
-                <div class="detail-col"><div class="detail-label">Sugar (100g):</div> ${getNutrient(p2, 'sugars_100g')}${p2.nutriments?.sugars_100g ? 'g' : ''}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-col"><div class="detail-label">Energy:</div> ${p1.nutriments?.energy_100g || 'N/A'} kcal</div>
-                <div class="detail-col"><div class="detail-label">Energy:</div> ${p2.nutriments?.energy_100g || 'N/A'} kcal</div>
-            </div>
-            <div class="detail-row" style="flex-direction: column; gap:10px;">
-                <div>
-                    <div class="detail-label">Ingredients (P1):</div>
-                    <p style="font-size:11px; max-height:60px; overflow-y:auto; background:#f9f9f9; padding:5px;">${p1.ingredients_text || 'No ingredients data available'}</p>
-                </div>
-                <div>
-                    <div class="detail-label">Ingredients (P2):</div>
-                    <p style="font-size:11px; max-height:60px; overflow-y:auto; background:#f9f9f9; padding:5px;">${p2.ingredients_text || 'No ingredients data available'}</p>
-                </div>
-            </div>
-        `;
+        detailsArea.innerHTML = generateDetailsHTML(p1, p2);
     } else {
-        section.classList.add('hidden');
+        compareSection.classList.add('hidden');
     }
 };
 
-// Search functionality
+// ഒരു പ്രോഡക്റ്റ് മാത്രം തൊടുമ്പോൾ ഡീറ്റെയിൽസ് കാണിക്കുന്നു
+const showSingleProductDetails = (p) => {
+    compareSection.classList.remove('hidden');
+    // സിംഗിൾ വ്യൂ ആയതുകൊണ്ട് VS ഹൈഡ് ചെയ്യുന്നു
+    document.getElementById('compare-vs').style.display = 'none';
+    document.getElementById('compare2').style.display = 'none';
+    
+    document.getElementById('compare1').innerHTML = `
+        <img src="${p.image_front_small_url || ''}" style="width:100px; height:100px;">
+        <h3>${p.product_name}</h3>
+    `;
+
+    detailsArea.innerHTML = `
+        <div style="padding:10px;">
+            <div class="detail-label">Grade:</div>
+            <div style="font-size:24px; font-weight:bold; color:#0097a7; text-transform:uppercase;">${p.nutrition_grades || 'N/A'}</div>
+            
+            <div class="detail-label" style="margin-top:10px;">Brand:</div>
+            <p>${p.brands || 'N/A'}</p>
+            
+            <div class="detail-label">Description / Ingredients:</div>
+            <p style="font-size:13px; line-height:1.4;">${p.ingredients_text || 'No description available.'}</p>
+            
+            <div class="detail-label">Full Technical Details:</div>
+            <pre style="font-size:11px; background:#eee; padding:10px; overflow-x:auto; white-space: pre-wrap;">
+                Energy: ${p.nutriments?.energy_100g || 'N/A'} kcal
+                Sugar: ${p.nutriments?.sugars_100g || 'N/A'}g
+                Fat: ${p.nutriments?.fat_100g || 'N/A'}g
+                Proteins: ${p.nutriments?.proteins_100g || 'N/A'}g
+                Salt: ${p.nutriments?.salt_100g || 'N/A'}g
+            </pre>
+            <a href="https://world.openfoodfacts.org/product/${p._id}" target="_blank" class="off-link">View on Open Food Facts website</a>
+        </div>
+    `;
+};
+
+// കംപാരിസൺ ഡീറ്റെയിൽസ് HTML നിർമ്മിക്കുന്നു
+const generateDetailsHTML = (p1, p2) => {
+    return `
+        <div class="detail-row">
+            <div class="detail-col">
+                <div class="detail-label">Grade:</div>
+                <b style="text-transform:uppercase; font-size:18px;">${p1.nutrition_grades || 'N/A'}</b>
+            </div>
+            <div class="detail-col">
+                <div class="detail-label">Grade:</div>
+                <b style="text-transform:uppercase; font-size:18px;">${p2.nutrition_grades || 'N/A'}</b>
+            </div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-col"><div class="detail-label">Brand:</div> ${p1.brands || 'N/A'}</div>
+            <div class="detail-col"><div class="detail-label">Brand:</div> ${p2.brands || 'N/A'}</div>
+        </div>
+        <div class="detail-row" style="flex-direction: column;">
+            <div class="detail-label">Product 1 Details:</div>
+            <p style="font-size:12px;">${p1.ingredients_text || 'No description'}</p>
+            <div class="detail-label">Product 2 Details:</div>
+            <p style="font-size:12px;">${p2.ingredients_text || 'No description'}</p>
+        </div>
+        <div class="detail-row">
+            <div class="detail-col"><b>Sugar:</b> ${p1.nutriments?.sugars_100g || 0}g</div>
+            <div class="detail-col"><b>Sugar:</b> ${p2.nutriments?.sugars_100g || 0}g</div>
+        </div>
+    `;
+};
+
+// സെർച്ച് ബോക്സ്
 let timer;
 searchInput.oninput = () => {
     clearTimeout(timer);
     timer = setTimeout(() => { 
         page = 1; 
-        currentQuery = searchInput.value || "food"; // currentQuery ഇവിടെ അപ്ഡേറ്റ് ചെയ്യുന്നു
+        currentQuery = searchInput.value || "food";
         fetchProducts(currentQuery, 1); 
     }, 800);
 };
 
-// Infinite Scroll
+// ഇൻഫിനിറ്റ് സ്ക്രോൾ
 const observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting && !isLoading) { 
         page++; 
         fetchProducts(currentQuery, page); 
     }
-}, { threshold: 0.1 });
-
+});
 observer.observe(scrollAnchor);
 
+// ക്ലോസ് ബട്ടൺ
 document.getElementById('close-compare').onclick = () => {
     selectedProducts = [];
     document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
-    updateCompareSection();
+    compareSection.classList.add('hidden');
+    // VS സെക്ഷൻ റീസെറ്റ് ചെയ്യുന്നു
+    document.getElementById('compare-vs').style.display = 'block';
+    document.getElementById('compare2').style.display = 'block';
 };
 
-// Initial Load
+// ആദ്യം ലോഡ് ചെയ്യുമ്പോൾ
 fetchProducts("food", 1);
