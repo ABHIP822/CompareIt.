@@ -1,4 +1,4 @@
-let page = 1;
+
 const productList = document.getElementById('product-list');
 const searchInput = document.getElementById('search-input');
 const loadingIndicator = document.getElementById('loading');
