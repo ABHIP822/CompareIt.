@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="home.css">
 </head>
 <body>
+
     <header>
         <div class="logo">CompareIt</div>
         <div class="icons">
@@ -14,21 +15,31 @@
         </div>
     </header>
 
+    <!-- SEARCH -->
     <input type="text" id="search-input" placeholder="Search products...">
 
+    <!-- LOADING -->
     <div id="loading" class="hidden">Loading...</div>
-    <div id="limit-message" class="hidden limit-message" style="color:red; text-align: center; margin-top: 20px;">
+
+    <!-- RATE LIMIT -->
+    <div id="limit-message" class="hidden limit-message">
         API rate limit reached. Please try again later.
     </div>
 
     <h2 class="section-title">All Food</h2>
+
+    <!-- PRODUCT LIST -->
     <div id="product-list">
         <p>Search products to display results</p>
     </div>
-    <div id="scroll-anchor" style="height: 20px;"></div>
 
-    <button id="compare-btn" type="button">Compare Selected Products</button>
+    <!-- IMPORTANT: SCROLL TRIGGER -->
+    <div id="scroll-anchor" style="height: 60px;"></div>
 
+    <!-- COMPARE -->
+    <button id="compare-btn">Compare Selected Products</button>
+
+    <!-- PRODUCT DETAILS -->
     <div id="product-details" class="hidden">
         <h2>Product Details</h2>
         <img id="detail-img" src="" alt="product Image">
@@ -36,14 +47,14 @@
         <p id="detail-brand"></p>
         <p id="detail-price"></p>
         <p id="detail-ingredients"></p>
-        <div id="safety-status"></div>
+
         <div class="api-credit">
-            <p>Data provided by <strong>Open Food Facts</strong>. This website uses the Open Food Facts API.</p>
-            <p>Visit: <a href="https://world.openfoodfacts.org" target="_blank">https://world.openfoodfacts.org</a></p>
-            <p>This product information is sourced from Open Food Facts and is displayed as per their open data terms.</p>
+            <p>Data provided by <strong>Open Food Facts</strong></p>
+            <p><a href="https://world.openfoodfacts.org" target="_blank">Visit API</a></p>
         </div>
     </div>
 
+    <!-- COMPARISON -->
     <div id="compare-section" class="hidden">
         <h2>Comparison</h2>
         <div class="compare-container">
@@ -56,6 +67,8 @@
         <p>CompareIt | powered by Open Food Facts API</p>
     </footer>
 
+    <!-- JS LINK (VERY IMPORTANT) -->
     <script src="home.js"></script>
+
 </body>
 </html>
