@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CompareIt - Home</title>
+    <title>CompareIt - Fast Food Search</title>
     <link rel="stylesheet" href="home.css">
 </head>
 <body>
@@ -15,19 +15,18 @@
         </div>
     </header>
 
-    <input type="text" id="search-input" placeholder="Search products (e.g. Milk, Chips)...">
-
-    <div id="loading" class="hidden">Loading products...</div>
-    <div id="limit-message" class="hidden limit-message">
-        API rate limit reached. Please wait a moment.
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search products (e.g. Milk, Chips)...">
     </div>
 
-    <h2 class="section-title" style="text-align: center;">All Food Products</h2>
+    <div id="loading" class="hidden">Fetching more products...</div>
+
+    <h2 class="section-title" style="text-align: center; margin-top: 10px;">All Food Products</h2>
     <p style="text-align: center; font-size: 12px; color: #666;">Select 2 products to compare</p>
 
     <div id="product-list"></div>
 
-    <div id="scroll-anchor" style="height: 20px;"></div>
+    <div id="scroll-anchor" style="height: 50px;"></div>
 
     <div id="compare-section" class="hidden">
         <div class="compare-header">
@@ -41,8 +40,7 @@
             <div id="compare2" class="compare-card"></div>
         </div>
 
-        <div id="full-details-area">
-            </div>
+        <div id="full-details-area"></div>
     </div>
 
     <footer>
