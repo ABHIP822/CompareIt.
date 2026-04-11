@@ -35,13 +35,15 @@ const fetchProducts = async (query = "", pageNum = 1) => {
             headers: { "User-Agent": userAgent }
         });
         const data = await response.json();
+
         currentProducts = 
 [...currentProducts, ...data.products];
+
         displayProducts(currentProducts);
     } catch (error) {
         console.error("Error fetching data:", error);
     }
-    // CHANGE 2: loading reset (IMPORTANT)
+    // CHANGE 2: reset loading
     isLoading = false;
 };
 
