@@ -10,7 +10,7 @@ let requestCount = 0;
 let currentProducts = [];
 let isLoading = false;
 
-// reset API count every minute
+// Reset API count every minute
 setInterval(() => {
     requestCount = 0;
 }, 60000);
@@ -28,7 +28,8 @@ const fetchProducts = async (query = "", pageNum = 1) => {
     loadingIndicator.classList.remove('hidden');
 
     try {
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // small delay (safe API usage)
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${query}&page=${pageNum}&json=1`;
 
@@ -37,13 +38,15 @@ const fetchProducts = async (query = "", pageNum = 1) => {
         const response = await fetch(url);
         const data = await response.json();
 
-        // append data (important for scroll)
-        currentProducts = [...currentProducts, ...(data.products || [])];
+        const newProducts = data.products || [];
+
+        // append (important for scroll)
+        currentProducts = [...currentProducts, ...newProducts];
 
         displayProducts(currentProducts);
 
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Fetch Error:", error);
     }
 
     loadingIndicator.classList.add('hidden');
@@ -59,7 +62,7 @@ const displayProducts = (products) => {
         return;
     }
 
-    products.forEach((product, index) => {
+    products.forEach((product) => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
 
@@ -72,7 +75,7 @@ const displayProducts = (products) => {
 
         productList.appendChild(productCard);
 
-        // select toggle
+        // SELECT TOGGLE
         productCard.addEventListener('click', () => {
             productCard.classList.toggle('selected');
         });
@@ -89,7 +92,7 @@ const observer = new IntersectionObserver((entries) => {
 
 observer.observe(scrollAnchor);
 
-// SEARCH
+// SEARCH (DEBOUNCE)
 let timeout = null;
 
 searchInput.addEventListener('input', () => {
@@ -104,7 +107,7 @@ searchInput.addEventListener('input', () => {
     }, 500);
 });
 
-// PRODUCT DETAILS
+// PRODUCT DETAILS CLICK
 productList.addEventListener('click', (e) => {
     const card = e.target.closest('.product-card');
 
@@ -118,6 +121,7 @@ productList.addEventListener('click', (e) => {
     }
 });
 
+// SHOW PRODUCT DETAILS
 const showProductDetails = (product) => {
     document.getElementById('product-details').classList.remove('hidden');
 
@@ -134,5 +138,11 @@ const showRateLimit = () => {
     document.getElementById('limit-message').classList.remove('hidden');
 };
 
-// INITIAL LOAD (IMPORTANT)
+// SETTINGS BUTTON (IMPORTANT FIX)
+document.getElementById('settings-btn').addEventListener('click', () => {
+    // 👉 change this if your profile page name is different
+    window.location.href = "profile.html";
+});
+
+// INITIAL LOAD (VERY IMPORTANT)
 fetchProducts("food", 1);
