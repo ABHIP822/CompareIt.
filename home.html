@@ -1,60 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CompareIt - Home</title>
+    <title>CompareIt</title>
     <link rel="stylesheet" href="home.css">
 </head>
 <body>
 
     <header>
-        <div class="logo">CompareIt</div>
-        <div class="icons">
-            <button id="settings-btn">⚙️</button>
-        </div>
+        <h2 class="logo">CompareIt</h2>
+        <button id="settings-btn">⚙️</button>
     </header>
 
-    <input type="text" id="search-input" placeholder="Search products (e.g. Milk, Chips)...">
-
-    <div id="loading" class="hidden">Loading products...</div>
-    <div id="limit-message" class="hidden limit-message">
-        API rate limit reached. Please wait a moment.
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search products...">
     </div>
 
-    <h2 class="section-title">All Food Products</h2>
-    <p style="text-align: center; font-size: 12px; color: #666;">Select 2 products to compare</p>
+    <div class="categories">
+        <button class="cat-btn active">All</button>
+        <button class="cat-btn">Food</button>
+        <button class="cat-btn">Electronics</button>
+        <button class="cat-btn">Drinks</button>
+    </div>
 
-    <div id="product-list"></div>
+    <button id="compare-main-btn" class="compare-trigger hidden">Compare 2 Products</button>
 
-    <div id="scroll-anchor" style="height: 20px;"></div>
+    <div id="product-list" class="grid-container"></div>
+    <div id="scroll-anchor"></div>
 
-    <div id="compare-section" class="hidden">
-        <div class="compare-header">
-            <h3>Product Comparison</h3>
-            <button id="close-compare">✖ Close</button>
-        </div>
-        <div class="compare-container">
-            <div id="compare1" class="compare-card"></div>
-            <div id="compare-vs">VS</div>
-            <div id="compare2" class="compare-card"></div>
+    <div id="details-overlay" class="overlay hidden">
+        <div class="overlay-content">
+            <span class="close-btn" onclick="closeOverlay('details-overlay')">&times;</span>
+            <div id="details-body"></div>
         </div>
     </div>
 
-    <div id="product-details" class="hidden">
-        <div class="details-content">
-            <button id="close-details">Close</button>
-            <h2>Product Details</h2>
-            <img id="detail-img" src="" alt="Product">
-            <h3 id="detail-name"></h3>
-            <p id="detail-brand"></p>
-            <p id="detail-ingredients"></p>
+    <div id="compare-overlay" class="overlay hidden">
+        <div class="overlay-content table-container">
+            <div class="compare-header">
+                <h3>Comparison</h3>
+                <span class="close-btn" onclick="closeOverlay('compare-overlay')">&times;</span>
+            </div>
+            <table id="compare-table">
+                </table>
         </div>
     </div>
-
-    <footer>
-        <p>CompareIt | Powered by Open Food Facts</p>
-    </footer>
 
     <script src="home.js"></script>
 </body>
