@@ -1,4 +1,3 @@
-
 let page = 1;
 let currentQuery = "food";
 let isLoading = false;
