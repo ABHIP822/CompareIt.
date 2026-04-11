@@ -12,11 +12,13 @@ const detailsArea = document.getElementById('full-details-area');
 
 /**
  * 1. ലോഡിങ് സമയത്ത് കാണിക്കേണ്ട ഷിമ്മർ ആനിമേഷൻ
+ * പ്രോഡക്റ്റ് വരാൻ വൈകുന്ന ആ സമയം ഇത് മിന്നിത്തിളങ്ങിക്കൊണ്ടിരിക്കും.
  */
 const showShimmer = () => {
-    loadingIndicator.innerHTML = ""; 
+    loadingIndicator.innerHTML = ""; // പഴയ കണ്ടന്റ് മാറ്റുന്നു
     loadingIndicator.classList.remove('hidden');
     
+    // 4 ഷിമ്മർ കാർഡുകൾ ലോഡിങ് സമയത്ത് കാണിക്കുന്നു
     for (let i = 0; i < 4; i++) {
         const shimmerCard = document.createElement('div');
         shimmerCard.className = 'shimmer-card'; 
@@ -37,7 +39,7 @@ const hideShimmer = () => {
 const fetchProducts = async (query, pageNum) => {
     if (isLoading) return;
     isLoading = true;
-    showShimmer();
+    showShimmer(); // ലോഡിങ് ആനിമേഷൻ തുടങ്ങുന്നു
 
     try {
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&page=${pageNum}&page_size=20&json=1`;
@@ -48,7 +50,7 @@ const fetchProducts = async (query, pageNum) => {
         console.error("Error fetching products:", e);
     } finally {
         isLoading = false;
-        hideShimmer();
+        hideShimmer(); // ലോഡിങ് കഴിഞ്ഞാൽ ആനിമേഷൻ നിർത്തുന്നു
     }
 };
 
@@ -72,23 +74,21 @@ const displayProducts = (products, isNew) => {
             </div>
         `;
 
-        // വലതുവശത്തെ സർക്കിളിൽ തൊട്ടാൽ മാത്രം കംപാരിസൺ സെലക്ഷൻ
+        // Checkbox-ൽ തൊട്ടാൽ മാത്രം കംപാരിസൺ സെലക്ഷൻ
         const indicator = card.querySelector('.select-indicator');
         indicator.onclick = (e) => {
-            e.stopPropagation(); // കാർഡിന്റെ ക്ലിക്ക് ഇവന്റ് തടയുന്നു
+            e.stopPropagation(); 
             toggleSelect(product, card);
         };
 
-        // ബാക്കി ഭാഗത്ത് (ഇമേജ്, പേര്) തൊട്ടാൽ സിംഗിൾ പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് കാണിക്കുന്നു
-        card.onclick = () => {
-            showSingleProductDetails(product);
-        };
+        // കാർഡിൽ (ഇമേജിലോ പേരിലോ) തൊട്ടാൽ ഫുൾ ഡീറ്റെയിൽസ്
+        card.onclick = () => showSingleProductDetails(product);
 
         productList.appendChild(card);
     });
 };
 
-// സിംഗിൾ പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് കാണിക്കുന്നു
+// സിംഗിൾ പ്രോഡക്റ്റ് ഡീറ്റെയിൽസ് കാണിക്കുന്നു (ഓർഡർ: Image -> Name -> Grade -> Company -> Details)
 const showSingleProductDetails = (p) => {
     compareSection.classList.remove('hidden');
     document.getElementById('compare-vs').style.display = 'none';
@@ -136,7 +136,6 @@ const toggleSelect = (product, card) => {
             alert("രണ്ട് പ്രോഡക്റ്റുകൾ മാത്രം കംപയർ ചെയ്യുക.");
         }
     }
-    // രണ്ട് പ്രോഡക്റ്റുകൾ സെലക്ട് ആയിട്ടുണ്ടെങ്കിൽ മാത്രം കംപാരിസൺ വ്യൂ കാണിക്കുന്നു
     updateCompareView();
 };
 
@@ -150,7 +149,6 @@ const updateCompareView = () => {
         document.getElementById('compare2').innerHTML = `<img src="${p2.image_front_small_url || ''}"><p>${p2.product_name}</p>`;
         detailsArea.innerHTML = generateCompareTable(p1, p2);
     } else {
-        // രണ്ടിൽ കുറവാണെങ്കിൽ കംപാരിസൺ വിൻഡോ തനിയെ പോപ്പ്-അപ്പ് ചെയ്യില്ല
         compareSection.classList.add('hidden');
     }
 };
