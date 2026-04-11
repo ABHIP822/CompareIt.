@@ -1,4 +1,4 @@
-let page = 1;
+Let page = 1;
 let currentQuery = "food";
 let isLoading = false;
 let selectedProducts = [];
@@ -140,6 +140,7 @@ const toggleSelect = (product, card) => {
     updateCompareView();
 };
 
+// ഈ ഭാഗത്താണ് നിങ്ങൾ പറഞ്ഞ മാറ്റങ്ങൾ വരുത്തിയിരിക്കുന്നത്
 const updateCompareView = () => {
     if (selectedProducts.length === 2) {
         compareSection.classList.remove('hidden');
@@ -157,6 +158,24 @@ const updateCompareView = () => {
             <div class="detail-row">
                 <div class="detail-col"><b>Brand:</b> ${p1.brands || 'N/A'}</div>
                 <div class="detail-col"><b>Brand:</b> ${p2.brands || 'N/A'}</div>
+            </div>
+            <div class="detail-row" style="border-top: 1px solid #eee; padding-top: 10px;">
+                <div class="detail-col" style="font-size:12px;"><b>Details:</b><br>${p1.ingredients_text || 'N/A'}</div>
+                <div class="detail-col" style="font-size:12px;"><b>Details:</b><br>${p2.ingredients_text || 'N/A'}</div>
+            </div>
+            <div class="detail-row" style="background:#f1f3f5; padding: 10px; border-radius: 8px;">
+                <div class="detail-col" style="font-size:11px;">
+                    <b>Nutriments (100g):</b><br>
+                    Energy: ${p1.nutriments?.energy_100g || 0}kcal<br>
+                    Sugar: ${p1.nutriments?.sugars_100g || 0}g<br>
+                    Fat: ${p1.nutriments?.fat_100g || 0}g
+                </div>
+                <div class="detail-col" style="font-size:11px;">
+                    <b>Nutriments (100g):</b><br>
+                    Energy: ${p2.nutriments?.energy_100g || 0}kcal<br>
+                    Sugar: ${p2.nutriments?.sugars_100g || 0}g<br>
+                    Fat: ${p2.nutriments?.fat_100g || 0}g
+                </div>
             </div>
         `;
     } else {
