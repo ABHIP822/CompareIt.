@@ -1,69 +1,118 @@
-let selectedItems = [];
+let page = 1;
+let currentQuery = "food";
+let isLoading = false;
+let selectedProducts = [];
+
 const productList = document.getElementById('product-list');
+const searchInput = document.getElementById('search-input');
+const loadingIndicator = document.getElementById('loading');
+const limitMessage = document.getElementById('limit-message');
+const scrollAnchor = document.getElementById('scroll-anchor');
 
-async function loadProducts() {
-    // Open Food Facts API Example
-    const res = await fetch('https://world.openfoodfacts.org/cgi/search.pl?search_terms=food&json=1&page_size=10');
-    const data = await res.json();
-    displayProducts(data.products);
-}
+const fetchProducts = async (query, pageNum) => {
+    if (isLoading) return;
+    isLoading = true;
+    loadingIndicator.classList.remove('hidden');
 
-function displayProducts(products) {
-    productList.innerHTML = products.map(p => `
-        <div class="product-card" id="card-${p._id}">
-            <div class="select-dot" onclick="event.stopPropagation(); toggleSelect('${p._id}', ${JSON.stringify(p).replace(/"/g, '&quot;')})"></div>
-            <div onclick="openDetails(${JSON.stringify(p).replace(/"/g, '&quot;')})">
-                <img src="${p.image_front_url || ''}">
-                <h4>${p.product_name || 'Product'}</h4>
-                <p style="color:var(--primary); font-weight:bold;">Grade: ${p.nutrition_grades?.toUpperCase() || 'N/A'}</p>
-            </div>
-        </div>
-    `).join('');
-}
+    try {
+        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&page=${pageNum}&page_size=20&json=1`;
+        const response = await fetch(url, {
+            headers: { 'User-Agent': 'CompareItApp/1.0' }
+        });
 
-function openDetails(p) {
-    const body = document.getElementById('details-body');
-    body.innerHTML = `
-        <img src="${p.image_front_url}" style="width:100%; border-radius:15px;">
-        <h2>${p.product_name}</h2>
-        <p><strong>Description:</strong> ${p.generic_name || 'No description available.'}</p>
-        <p><strong>Malayalam:</strong> വിവരം ലഭ്യമല്ല (Malayalam translation can be added via translation API)</p>
-        <hr>
-        <p>Data provided by <a href="https://world.openfoodfacts.org/product/${p._id}" target="_blank">Open Food Facts</a></p>
-    `;
-    document.getElementById('details-overlay').classList.remove('hidden');
-}
+        if (response.status === 429) {
+            limitMessage.classList.remove('hidden');
+            return;
+        }
 
-function toggleSelect(id, p) {
-    const card = document.getElementById(`card-${id}`);
-    const index = selectedItems.findIndex(item => item._id === id);
-
-    if (index > -1) {
-        selectedItems.splice(index, 1);
-        card.classList.remove('selected');
-    } else if (selectedItems.length < 2) {
-        selectedItems.push(p);
-        card.classList.add('selected');
+        const data = await response.json();
+        displayProducts(data.products || [], pageNum === 1);
+    } catch (e) { console.error(e); }
+    finally {
+        isLoading = false;
+        loadingIndicator.classList.add('hidden');
     }
-
-    const btn = document.getElementById('compare-main-btn');
-    btn.classList.toggle('hidden', selectedItems.length < 2);
-    btn.innerText = `Compare ${selectedItems.length} Products`;
-}
-
-document.getElementById('compare-main-btn').onclick = () => {
-    const table = document.getElementById('compare-table');
-    const [p1, p2] = selectedItems;
-
-    table.innerHTML = `
-        <tr><th class="feature-col">Feature</th><th>${p1.product_name}</th><th>${p2.product_name}</th></tr>
-        <tr><td class="feature-col">Image</td><td><img src="${p1.image_front_small_url}" width="50"></td><td><img src="${p2.image_front_small_url}" width="50"></td></tr>
-        <tr><td class="feature-col">Grade</td><td>${p1.nutrition_grades?.toUpperCase()}</td><td>${p2.nutrition_grades?.toUpperCase()}</td></tr>
-        <tr><td class="feature-col">Ingredients</td><td>${p1.ingredients_text?.substring(0,50)}...</td><td>${p2.ingredients_text?.substring(0,50)}...</td></tr>
-    `;
-    document.getElementById('compare-overlay').classList.remove('hidden');
 };
 
-function closeOverlay(id) { document.getElementById(id).classList.add('hidden'); }
+const displayProducts = (products, isNew) => {
+    if (isNew) productList.innerHTML = "";
+    products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        // നിലവിൽ സെലക്ട് ചെയ്തതാണോ എന്ന് നോക്കുന്നു
+        if(selectedProducts.find(p => p._id === product._id)) card.classList.add('selected');
 
-loadProducts();
+        card.innerHTML = `
+            <div class="select-indicator"></div>
+            <img src="${product.image_front_small_url || 'https://via.placeholder.com/150'}" alt="">
+            <h4 style="font-size:12px; margin:5px 0;">${product.product_name || 'Unknown'}</h4>
+        `;
+
+        card.onclick = (e) => {
+            // ടിക് ബട്ടണിലോ കാർഡിലോ ക്ലിക്ക് ചെയ്താൽ സെലക്ട് ആകും
+            toggleSelect(product, card);
+        };
+        productList.appendChild(card);
+    });
+};
+
+const toggleSelect = (product, card) => {
+    const index = selectedProducts.findIndex(p => p._id === product._id);
+    if (index > -1) {
+        selectedProducts.splice(index, 1);
+        card.classList.remove('selected');
+    } else {
+        if (selectedProducts.length < 2) {
+            selectedProducts.push(product);
+            card.classList.add('selected');
+        } else {
+            alert("Please deselect a product to add a new one (Max 2).");
+        }
+    }
+    updateCompareSection();
+};
+
+const updateCompareSection = () => {
+    const section = document.getElementById('compare-section');
+    if (selectedProducts.length === 2) {
+        section.classList.remove('hidden');
+        selectedProducts.forEach((p, i) => {
+            document.getElementById(`compare${i+1}`).innerHTML = `
+                <img src="${p.image_front_small_url || ''}">
+                <p><strong>${p.product_name.substring(0,15)}..</strong></p>
+                <p>Grade: ${p.nutrition_grades?.toUpperCase() || 'N/A'}</p>
+            `;
+        });
+    } else {
+        section.classList.add('hidden');
+    }
+};
+
+// Search with Debounce
+let timer;
+searchInput.oninput = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+        page = 1;
+        currentQuery = searchInput.value || "food";
+        fetchProducts(currentQuery, 1);
+    }, 800);
+};
+
+// Infinite Scroll
+const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !isLoading) {
+        page++;
+        fetchProducts(currentQuery, page);
+    }
+});
+observer.observe(scrollAnchor);
+
+document.getElementById('close-compare').onclick = () => {
+    selectedProducts = [];
+    document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+    updateCompareSection();
+};
+
+// Initial Load
+fetchProducts("food", 1);
