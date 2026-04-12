@@ -1,4 +1,4 @@
-body {
+Body {
     margin: 0;
     font-family: Arial, sans-serif;
 }
@@ -15,8 +15,10 @@ body {
 
 #intro-screen h1 {
     font-size: 40px;
+    margin-bottom: 5px; /* ഹെഡിങ്ങിന് താഴെയുള്ള ഗ്യാപ്പ് കുറച്ചു */
 }
 
 #intro-screen p {
     font-size: 18px;
+    margin-top: 0; /* പാരഗ്രാഫിന് മുകളിലുള്ള ഗ്യാപ്പ് ഒഴിവാക്കി */
 }
