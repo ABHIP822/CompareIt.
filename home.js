@@ -189,3 +189,9 @@ document.getElementById('close-compare').onclick = () => {
 };
 
 fetchProducts("food", 1);
+
+
+
+document.getElementById('comparative-btn').onclick = function() {
+    window.location.href = "hope.html";
+};
