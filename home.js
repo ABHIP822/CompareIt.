@@ -15,7 +15,7 @@ const showShimmer = () => {
     loadingIndicator.classList.remove('hidden');
     loadingIndicator.style.display = "grid"; 
     loadingIndicator.innerHTML = ""; 
-    
+
     // 8 ഷിമ്മർ കാർഡുകൾ ആനിമേഷനായി ഉണ്ടാക്കുന്നു
     for (let i = 0; i < 8; i++) { 
         const shimmerCard = document.createElement('div');
@@ -38,7 +38,7 @@ const hideShimmer = () => {
 const fetchProducts = async (query, pageNum) => {
     if (isLoading) return;
     isLoading = true;
-    
+
     // ഡാറ്റ വരുന്നതിന് മുൻപ് ആനിമേഷൻ കാണിക്കാൻ
     showShimmer(); 
 
@@ -46,7 +46,7 @@ const fetchProducts = async (query, pageNum) => {
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&page=${pageNum}&page_size=20&json=1`;
         const response = await fetch(url, { headers: { 'User-Agent': 'CompareItApp/1.0' } });
         const data = await response.json();
-        
+
         // ഡാറ്റ വന്നുകഴിഞ്ഞാൽ ആനിമേഷൻ മാറ്റുക
         hideShimmer();
         displayProducts(data.products || [], pageNum === 1);
@@ -61,7 +61,7 @@ const fetchProducts = async (query, pageNum) => {
 // പ്രോഡക്റ്റുകൾ സ്ക്രീനിൽ കാണിക്കുന്നു
 const displayProducts = (products, isNew) => {
     if (isNew) productList.innerHTML = "";
-    
+
     products.forEach(product => {
         if (!product.product_name) return;
 
@@ -93,7 +93,7 @@ const showSingleProductDetails = (p) => {
     compareSection.classList.remove('hidden');
     document.getElementById('compare-vs').style.display = 'none';
     document.getElementById('compare2').style.display = 'none';
-    
+
     document.getElementById('compare1').innerHTML = `
         <img src="${p.image_front_small_url || ''}" style="width:130px; height:130px; object-fit:contain; border-radius:10px;">
         <h2 style="margin:10px 0; font-size:18px;">${p.product_name}</h2>
@@ -148,7 +148,7 @@ const updateCompareView = () => {
         const [p1, p2] = selectedProducts;
         document.getElementById('compare1').innerHTML = `<img src="${p1.image_front_small_url || ''}"><p>${p1.product_name}</p>`;
         document.getElementById('compare2').innerHTML = `<img src="${p2.image_front_small_url || ''}"><p>${p2.product_name}</p>`;
-        
+
         detailsArea.innerHTML = `
             <div class="detail-row">
                 <div class="detail-col"><b>Grade:</b> ${p1.nutrition_grades || 'N/A'}</div>
@@ -189,9 +189,3 @@ document.getElementById('close-compare').onclick = () => {
 };
 
 fetchProducts("food", 1);
-
-
-
-document.getElementById('comparative-btn').onclick = function() {
-    window.location.href = "hope.html";
-};
