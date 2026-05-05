@@ -1,151 +1,84 @@
 body {
-    background: #f8f9fa; /* മൊത്തത്തിലുള്ള ബാക്ക്ഗ്രൗണ്ട് ഇളം ഗ്രേ */
+    background: #f4f6f8;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding-bottom: 100px;
+    padding-bottom: 150px;
 }
 
-/* HEADER */
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #ffffff; /* വൈറ്റ് ബാക്ക്ഗ്രൗണ്ട് */
-    padding: 15px 20px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid #f0f0f0;
+    display: flex; justify-content: space-between; align-items: center;
+    background: #0097a7; color: white; padding: 15px 20px;
+    position: sticky; top: 0; z-index: 100;
 }
 
-header h1 {
-    color: #008ecf; /* നിങ്ങൾ പറഞ്ഞ ആ പ്രത്യേക ബ്ലൂ കളർ */
-    font-size: 24px;
-    margin: 0;
-    font-weight: bold;
-}
+.hidden { display: none !important; }
 
-.settings-icon {
-    font-size: 22px;
-    color: #333; /* സെറ്റിംഗ്സ് ഐക്കൺ ഡാർക്ക് കളർ */
-    cursor: pointer;
-}
-
-/* SEARCH SECTION */
 .search-container {
-    background: #ffffff;
-    padding: 10px 20px;
-}
-
-.search-box {
-    display: flex;
-    align-items: center;
-    background: #f1f3f4;
-    border: 1px solid #dfe1e5;
-    border-radius: 12px;
-    padding: 8px 15px;
+    background: #0097a7;
+    padding: 10px 0 20px 0;
+    border-radius: 0 0 25px 25px;
 }
 
 #search-input {
-    width: 100%;
-    border: none;
-    background: transparent;
-    outline: none;
-    padding: 8px;
-    font-size: 16px;
-    color: #5f6368;
+    width: 85%; margin: 0 auto; display: block;
+    padding: 12px 20px; border-radius: 25px; border: none; outline: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* CATEGORY BAR */
-.category-bar {
-    display: flex;
-    gap: 12px;
-    padding: 15px 20px;
-    overflow-x: auto;
-    background: #f1f3f4;
-    scrollbar-width: none;
-}
-
-.category-btn {
-    padding: 8px 24px;
-    border-radius: 10px;
-    background: #ffffff; /* ചിപ്‌സ് വൈറ്റ് */
-    border: none;
-    font-size: 14px;
-    font-weight: 500;
-    color: #5f6368;
-    cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.category-btn.active {
-    background: #ffffff;
-    color: #000;
-    font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-/* PRODUCT GRID */
 #product-list {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* ഇമേജിലുള്ളതുപോലെ രണ്ട് കോളം */
-    gap: 15px;
-    padding: 15px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px; padding: 15px;
 }
 
-/* PRODUCT CARD */
+/* Skeleton Loading Animation - Speed കൂട്ടാൻ സഹായിക്കും */
+.skeleton-card {
+    height: 180px;
+    background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 15px;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 .product-card {
-    background: #ffffff; /* പ്യുവർ വൈറ്റ് */
-    border-radius: 20px;
-    padding: 0; /* ഇമേജ് കൃത്യമായി ഇരിക്കാൻ */
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    border: 1px solid #f0f0f0;
-    transition: transform 0.2s;
+    background: white; border-radius: 15px; padding: 10px;
+    position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s; border: 2px solid transparent; cursor: pointer;
 }
 
-.product-card:active {
-    transform: scale(0.97);
-}
+.product-card:active { transform: scale(0.95); }
+.product-card img { width: 100%; height: 110px; object-fit: contain; border-radius: 8px; }
 
-.product-info {
-    padding: 12px;
-}
-
-.product-card img {
-    width: 100%;
-    height: 160px;
-    object-fit: cover; /* ഫുഡ് ഇമേജുകൾക്ക് ഭംഗി നൽകാൻ */
-}
-
-.product-name {
-    font-weight: bold;
-    font-size: 15px;
-    color: #000;
-    margin-bottom: 4px;
-}
-
-.product-category {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 8px;
-}
-
-.product-price {
-    font-weight: bold;
-    color: #008ecf; /* പ്രൈസിനും ആ ബ്ലൂ കളർ നൽകി */
-    font-size: 16px;
-}
-
-/* SELECT INDICATOR (The circle in image) */
 .select-indicator {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #fff;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    position: absolute; top: 10px; right: 10px; width: 22px; height: 22px;
+    border: 2px solid #0097a7; border-radius: 50%; background: white;
 }
+
+.product-card.selected { border-color: #0097a7; background: #e0f7fa; }
+.product-card.selected .select-indicator {
+    background: #0097a7; box-shadow: inset 0 0 0 3px white;
+}
+
+#compare-section {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    max-height: 70vh; background: white; 
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.2);
+    padding: 15px; z-index: 1000; border-radius: 20px 20px 0 0;
+    overflow-y: auto;
+}
+
+.compare-header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
+.compare-container { display: flex; align-items: center; justify-content: space-around; padding: 10px 0; }
+.compare-card { text-align: center; width: 45%; }
+.compare-card img { width: 60px; height: 60px; object-fit: contain; }
+#full-details-area { margin-top: 15px; font-size: 13px; }
+.detail-row { display: flex; justify-content: space-between; border-bottom: 1px solid #f0f0f0; padding: 10px 0; }
+.detail-col { width: 48%; color: #333; }
+.detail-label { font-weight: bold; color: #0097a7; font-size: 11px; text-transform: uppercase; }
+.off-link { color: #0097a7; text-decoration: none; font-weight: bold; font-size: 11px; }
+
+#loading { text-align: center; padding: 10px; color: #0097a7; font-weight: bold; }
