@@ -25,9 +25,10 @@ header {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-
-/* PRODUCT GRID */ display: grid; #product-list { grid-template-columns: 1fr 1fr; /* * ഇമേജിലുള്ളതുപോല െ രണ്ട് കോളം */T } gap: 15px; padding: 15px;
-
+#product-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px; padding: 15px;
+}
 
 /* Skeleton Loading Animation - Speed കൂട്ടാൻ സഹായിക്കും */
 .skeleton-card {
